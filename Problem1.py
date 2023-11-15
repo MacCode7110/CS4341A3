@@ -9,12 +9,12 @@
 # 4. Recalculate the centroids of each cluster
 # 5. Repeat #3 and #4 (assign all data points to the closest cluster centroid and recalculate the centroids of each cluster)
 
+# The k-means algorithm stops execution when all centroids stay unchanged for two successive iterations.
+
 import pandas  # pandas is used for data manipulation and analysis.
 import numpy  # numpy is used to perform a wide variety of mathematical operations on arrays.
 import random
-import matplotlib
 import matplotlib.pyplot as plt  # matplotlib is used for creating graphs, which is required in part b
-import tkinter as tk
 
 
 class KMeansClusteringAlgorithm:
@@ -37,23 +37,22 @@ class KMeansClusteringAlgorithm:
             y_coordinate_list_copy.remove(y_coordinate_list_copy[random_index])
         return centroid_list_x, centroid_list_y
 
-    def generate_plot(self, x_coordinate_list, y_coordinate_list, centroid_list_x, centroid_list_y):
-        plt.scatter(x_coordinate_list, y_coordinate_list, c='blue')
-        plt.scatter(centroid_list_x, centroid_list_y, c='green')
+    def generate_plot(self, centroid_list_x, centroid_list_y):
+        plt.scatter(self.x_coordinate_list, self.y_coordinate_list, c='blue')  # coordinates are denoted as blue dots
+        plt.scatter(centroid_list_x, centroid_list_y, c='red')  # centroids are denoted as red dots
         plt.xlabel('Length')
         plt.ylabel('Width')
-        matplotlib.use('TkAgg')
         plt.show()
 
     def assign_all_data_points_to_a_cluster(self):
-        self
+            # Need to figure out how to do this part pf the algorithm
 
     def recalculate_centroids_of_every_cluster(self):
         self
 
     def run_algorithm(self):
         centroid_list_x, centroid_list_y = self.randomly_select_x_and_y_centroids()
-        self.generate_plot(self.x_coordinate_list, self.y_coordinate_list, centroid_list_x, centroid_list_y)
+        self.generate_plot(centroid_list_x, centroid_list_y)
 
 
 row_number, x_coordinates, y_coordinates = numpy.loadtxt('cluster_data.txt', delimiter=',', unpack=True)
