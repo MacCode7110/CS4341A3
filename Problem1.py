@@ -5,14 +5,14 @@
 # The steps go as follows:
 # 1. Set the number of clusters that will be generated
 # 2. Randomly select the centroids for the dataset
-# 3. Assign all data points to the closest cluster centroid
+# 3. Assign each data point to the closest cluster centroid
 # 4. Recalculate the centroids of each cluster
 # 5. Repeat #3 and #4 (assign all data points to the closest cluster centroid and recalculate the centroids of each cluster)
 
 # The k-means algorithm stops execution when all centroids stay unchanged for two successive iterations.
 
-import pandas  # pandas is used for data manipulation and analysis.
-import numpy  # numpy is used to perform a wide variety of mathematical operations on arrays.
+import pandas as pd  # pandas is used for data manipulation and analysis.
+import numpy as np  # numpy is used to perform a wide variety of mathematical operations on arrays.
 import random
 import matplotlib.pyplot as plt  # matplotlib is used for creating graphs, which is required in part b
 
@@ -45,7 +45,7 @@ class KMeansClusteringAlgorithm:
         plt.show()
 
     def assign_all_data_points_to_a_cluster(self):
-            # Need to figure out how to do this part pf the algorithm
+        self
 
     def recalculate_centroids_of_every_cluster(self):
         self
@@ -55,6 +55,6 @@ class KMeansClusteringAlgorithm:
         self.generate_plot(centroid_list_x, centroid_list_y)
 
 
-row_number, x_coordinates, y_coordinates = numpy.loadtxt('cluster_data.txt', delimiter=',', unpack=True)
+row_number, x_coordinates, y_coordinates = np.loadtxt("cluster_data.txt", delimiter=None, unpack=True)
 k_means_user_1 = KMeansClusteringAlgorithm(x_coordinates.tolist(), y_coordinates.tolist(), 3)
 k_means_user_1.run_algorithm()
