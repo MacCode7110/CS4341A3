@@ -23,6 +23,7 @@ class KMeansClusteringAlgorithm:
         self.x_coordinate_list = x_coordinate_list
         self.y_coordinate_list = y_coordinate_list
         self.cluster_number = cluster_number  # Set the number of clusters that will be generated
+        self.total_change_in_centroid_positions = 1
 
     def randomly_select_x_and_y_centroids(self):
         centroid_list_x = []
