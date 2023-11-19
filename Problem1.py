@@ -1,7 +1,7 @@
 # Problem 1 - Parts a and b combined as they go hand-in-hand
 
 # K-means clustering is an unsupervised machine learning algorithm that takes an unlabeled dataset and groups it into different clusters.
-# I referenced the following s to help me better understand the steps involved in the k-means algorithm:
+# I referenced the following resources to help me better understand the steps involved in the k-means algorithm:
 # https://www.analyticsvidhya.com/blog/2019/08/comprehensive-guide-k-means-clustering/?
 # https://www.jeremyjordan.me/grouping-data-points-with-k-means-clustering/
 # The steps go as follows:
