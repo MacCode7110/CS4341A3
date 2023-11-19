@@ -1,7 +1,9 @@
 # Problem 1 - Parts a and b combined
 
 # K-means clustering is an unsupervised machine learning algorithm that takes an unlabeled dataset and groups it into different clusters.
-# I referenced the following resource to help me better understand the steps involved in the k-means algorithm: https://www.analyticsvidhya.com/blog/2019/08/comprehensive-guide-k-means-clustering/?
+# I referenced the following s to help me better understand the steps involved in the k-means algorithm:
+# https://www.analyticsvidhya.com/blog/2019/08/comprehensive-guide-k-means-clustering/?
+# https://www.jeremyjordan.me/grouping-data-points-with-k-means-clustering/
 # The steps go as follows:
 # 1. Set the number of clusters that will be generated
 # 2. Randomly select the centroids for the dataset
@@ -10,13 +12,14 @@
 # 5. Repeat #3 and #4 (assign all data points to the closest cluster centroid and recalculate the centroids of each cluster)
 
 # The k-means algorithm stops execution when the total change in centroid positions remains unchanged.
-# Here, the closest cluster centroid for each vector is computed using the euclidean distance.
+# For step 3, the closest cluster centroid for each vector is computed using the euclidean distance. A vector is assigned to the cluster that it is the lowest euclidean distance away from compared to all other clusters.
+# For step 4, the centroids of each cluster are recalculated as follows; the mean data point of each cluster becomes the new centroid of that cluster. Given that we are working with a scatter plot, we compute the mean value of a cluster just as we would the mean value of a scatter plot or subset of a scatter plot. The mean data point takes the form of (mean value of x-coordinates in current cluster, mean value of y-coordinates in current cluster).
 
 # Each cluster contains a centroid and points assigned to that cluster.
 # All points assigned to a cluster have a distinct, randomly chosen shape, and a distinct, unifying color that is also randomly chosen.
 # The centroid in a cluster has a distinct color and the same shape as the points assigned to that cluster.
 
-import pandas as pd  # pandas is used for data manipulation and analysis.
+import statistics as st  # Perform statistical operations in data.
 import numpy as np  # numpy is used to perform a wide variety of mathematical operations on arrays.
 import random
 import matplotlib.pyplot as plt  # matplotlib is used for creating graphs, which is required in part b
@@ -43,72 +46,133 @@ class KMeansClusteringAlgorithm:
             y_coordinate_list_copy.remove(y_coordinate_list_copy[random_index])
         return centroid_list_x, centroid_list_y
 
-    def generate_plot(self, centroid_list_x, centroid_list_y):
-        plt.scatter(self.x_coordinate_list, self.y_coordinate_list, c='blue')
-        plt.scatter(centroid_list_x, centroid_list_y, c='red')
+    def generate_plot(self, cluster_object_list):
+        for i1 in range(len(cluster_object_list)):
+            cluster_coordinate_assignees_color = ColorRecord.get_available_color()
+            cluster_centroid_color = ColorRecord.get_available_color()
+            cluster_coordinate_shape = ShapeRecord.get_available_shape()
+            for j1 in range(len(cluster_object_list[i1].x_coordinate_assignees)):
+                plt.scatter(cluster_object_list[i1].x_coordinate_assignees[j1], cluster_object_list[i1].y_coordinate_assignees[j1], c=cluster_coordinate_assignees_color, marker=cluster_coordinate_shape)
+            plt.scatter(cluster_object_list[i1].centroid_x, cluster_object_list[i1].centroid_y, c=cluster_centroid_color, marker=cluster_coordinate_shape)
         plt.xlabel('Length')
         plt.ylabel('Width')
         plt.show()
 
-    def assign_all_data_points_to_closest_cluster_and_create_cluster_objects(self, centroid_list_x, centroid_list_y):
+    def create_cluster_objects_and_assign_all_data_points_to_closest_cluster(self, centroid_list_x, centroid_list_y):
         cluster_object_list = []
+        euclidean_distances_from_centroids_list_for_current_point = []
+
         for i1 in range(len(self.x_coordinate_list)):
-            euclidean_distance_from_centroid = 0
-            shortest_euclidean_distance_from_a_centroid = 0
+            closest_centroid_x_and_closest_centroid_y_have_been_found_in_cluster_list_for_current_x_and_y_coordinates = False
+            euclidean_distances_from_centroids_list_for_current_point.clear()
+            x_coordinate_placeholder_list = []
+            y_coordinate_placeholder_list = []
+
             for j1 in range(len(centroid_list_x)):
-                euclidean_distance_from_centroid = np.sqrt(np.square(1))
+                euclidean_distances_from_centroids_list_for_current_point.append(np.sqrt(np.square((self.x_coordinate_list[i1] - centroid_list_x[j1])) + np.square((self.y_coordinate_list[i1] - centroid_list_y[j1]))))
+            index_of_minimum_euclidean_distance_for_current_point = euclidean_distances_from_centroids_list_for_current_point.index(min(euclidean_distances_from_centroids_list_for_current_point))
+            closest_centroid_x_coordinate = centroid_list_x[index_of_minimum_euclidean_distance_for_current_point]
+            closest_centroid_y_coordinate = centroid_list_y[index_of_minimum_euclidean_distance_for_current_point]
+
+            if len(cluster_object_list) == 0:
+                x_coordinate_placeholder_list.clear()
+                y_coordinate_placeholder_list.clear()
+                x_coordinate_placeholder_list.append(self.x_coordinate_list[i1])
+                y_coordinate_placeholder_list.append(self.y_coordinate_list[i1])
+                cluster_object_list.append(Cluster(x_coordinate_placeholder_list, y_coordinate_placeholder_list,
+                closest_centroid_x_coordinate, closest_centroid_y_coordinate))
+            else:
+                for k1 in range(len(cluster_object_list)):
+                    if closest_centroid_x_coordinate == cluster_object_list[k1].centroid_x and closest_centroid_y_coordinate == cluster_object_list[k1].centroid_y:
+                        cluster_object_list[k1].append_x_coordinate_assignees(self.x_coordinate_list[i1])
+                        cluster_object_list[k1].append_y_coordinate_assignees(self.y_coordinate_list[i1])
+                        closest_centroid_x_and_closest_centroid_y_have_been_found_in_cluster_list_for_current_x_and_y_coordinates = True
+                if not closest_centroid_x_and_closest_centroid_y_have_been_found_in_cluster_list_for_current_x_and_y_coordinates:
+                    x_coordinate_placeholder_list.clear()
+                    y_coordinate_placeholder_list.clear()
+                    x_coordinate_placeholder_list.append(self.x_coordinate_list[i1])
+                    y_coordinate_placeholder_list.append(self.y_coordinate_list[i1])
+                    cluster_object_list.append(Cluster(x_coordinate_placeholder_list, y_coordinate_placeholder_list,
+                    closest_centroid_x_coordinate, closest_centroid_y_coordinate))
+
         return cluster_object_list
 
-    def recalculate_centroids_of_every_cluster(self, cluster_object_list, centroid_list_x, centroid_list_y):
-        self
+    def recalculate_centroids_of_every_cluster(self, cluster_object_list):
+        new_centroid_list_x = []
+        new_centroid_list_y = []
+        for i1 in range(len(cluster_object_list)):
+            centroid_x_placeholder_list = []
+            centroid_y_placeholder_list = []
+            centroid_x_placeholder_list.append(cluster_object_list[i1].centroid_x)
+            centroid_y_placeholder_list.append(cluster_object_list[i1].centroid_y)
+            all_x_coordinates_for_current_cluster = cluster_object_list[i1].x_coordinate_assignees + centroid_x_placeholder_list
+            all_y_coordinates_for_current_cluster = cluster_object_list[i1].y_coordinate_assignees + centroid_y_placeholder_list
+            mean_x_coordinate = st.mean(all_x_coordinates_for_current_cluster)
+            mean_y_coordinate = st.mean(all_y_coordinates_for_current_cluster)
+            new_centroid_list_x.append(mean_x_coordinate)
+            new_centroid_list_y.append(mean_y_coordinate)
+        return new_centroid_list_x, new_centroid_list_y
+
+    def update_total_change_in_centroid_positions(self, old_centroid_list_x, old_centroid_list_y, updated_centroid_list_x, updated_centroid_list_y):
+        sum_of_differences_in_centroid_positions = sum([a - b for a, b in zip(updated_centroid_list_x, old_centroid_list_x)]) + sum([a - b for a, b in zip(updated_centroid_list_y, old_centroid_list_y)])
+        self.total_change_in_centroid_positions = sum_of_differences_in_centroid_positions
 
     def run_algorithm(self):
         centroid_list_x, centroid_list_y = self.randomly_select_x_and_y_centroids()
         while self.total_change_in_centroid_positions != 0:
-            cluster_object_list = self.assign_all_data_points_to_closest_cluster_and_create_cluster_objects(
+            cluster_object_list = self.create_cluster_objects_and_assign_all_data_points_to_closest_cluster(
                 centroid_list_x, centroid_list_y)
-            self.recalculate_centroids_of_every_cluster(cluster_object_list, centroid_list_x, centroid_list_y)
-        # self.generate_plot(centroid_list_x, centroid_list_y)
+            new_centroid_list_x, new_centroid_list_y = self.recalculate_centroids_of_every_cluster(cluster_object_list)
+            self.update_total_change_in_centroid_positions(centroid_list_x, centroid_list_y, new_centroid_list_x, new_centroid_list_y)
+            centroid_list_x = new_centroid_list_x.copy()
+            centroid_list_y = new_centroid_list_y.copy()
+        self.generate_plot(cluster_object_list)
 
 
 class ColorRecord:
-    def __init__(self):
-        self.color_list = ["#d14338", "#e3c51e", "#b0e610", "#64eb10", "#667869", "#58f5db", "#0095ff", "#6600ff"]
 
-    def get_available_color(self):
-        random_index = random.randint(0, len(self.color_list) - 1)
-        available_color = self.color_list[random_index]
-        self.update_available_colors(random_index)
+    color_list = ["#d14338", "#e3c51e", "#b0e610", "#64eb10", "#667869", "#58f5db", "#0095ff", "#6600ff"]
+
+    @classmethod
+    def get_available_color(cls):
+        random_index = random.randint(0, len(cls.color_list) - 1)
+        available_color = cls.color_list[random_index]
+        cls.update_available_colors(random_index)
         return available_color
 
-    def update_available_colors(self, index):
-        self.color_list.remove(self.color_list[index])
+    @classmethod
+    def update_available_colors(cls, index):
+        ColorRecord.color_list.remove(ColorRecord.color_list[index])
 
 
 class ShapeRecord:
-    def __init__(self):
-        self.shape_list = ["v", "o", "x", "s"]
 
-    def get_available_shape(self):
-        random_index = random.randint(0, len(self.shape_list) - 1)
-        available_shape = self.shape_list[random_index]
-        self.update_available_shapes(random_index)
+    shape_list = ["v", "o", "x", "s"]
+
+    @classmethod
+    def get_available_shape(cls):
+        random_index = random.randint(0, len(cls.shape_list) - 1)
+        available_shape = cls.shape_list[random_index]
+        cls.update_available_shapes(random_index)
         return available_shape
 
-    def update_available_shapes(self, index):
-        self.shape_list.remove(self.shape_list[index])
+    @classmethod
+    def update_available_shapes(cls, index):
+        cls.shape_list.remove(cls.shape_list[index])
 
 
 class Cluster:
-    def __init__(self, x_coordinate_assignees, y_coordinate_assignees, centroid_x, centroid_y, coordinate_shape,
-                 assigned_coordinate_color, centroid_color):
+    def __init__(self, x_coordinate_assignees, y_coordinate_assignees, centroid_x, centroid_y):
         self.x_coordinate_assignees = x_coordinate_assignees
         self.y_coordinate_assignees = y_coordinate_assignees
         self.centroid_x = centroid_x
         self.centroid_y = centroid_y
-        self.coordinate_shape = coordinate_shape
-        self.assigned_coordinate_color = assigned_coordinate_color
-        self.centroid_color = centroid_color
+
+    def append_x_coordinate_assignees(self, new_x_coordinate):
+        self.x_coordinate_assignees.append(new_x_coordinate)
+
+    def append_y_coordinate_assignees(self, new_y_coordinate):
+        self.y_coordinate_assignees.append(new_y_coordinate)
 
 
 row_number, x_coordinates, y_coordinates = np.loadtxt("cluster_data.txt", delimiter=None, unpack=True)
