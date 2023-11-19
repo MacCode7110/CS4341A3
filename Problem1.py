@@ -11,13 +11,13 @@
 # 4. Recalculate the centroids of each cluster
 # 5. Repeat #3 and #4 (assign all data points to the closest cluster centroid and recalculate the centroids of each cluster)
 
-# The k-means algorithm stops execution when the total change in centroid positions remains unchanged.
+# The k-means algorithm stops execution when the change in centroid positions remains unchanged. This is determined by computing the sum of all differences in centroid positions after each time all the centroid positions are recalculated.
 # For step 3, the closest cluster centroid for each vector is computed using the euclidean distance. A vector is assigned to the cluster that it is the lowest euclidean distance away from compared to all other clusters.
 # For step 4, the centroids of each cluster are recalculated as follows; the mean data point of each cluster becomes the new centroid of that cluster. Given that we are working with a scatter plot, we compute the mean value of a cluster just as we would the mean value of a scatter plot or subset of a scatter plot. The mean data point takes the form of (mean value of x-coordinates in current cluster, mean value of y-coordinates in current cluster).
 
 # Each cluster contains a centroid and points assigned to that cluster.
 # All points assigned to a cluster have a distinct, randomly chosen shape, and a distinct, unifying color that is also randomly chosen.
-# The centroid in a cluster has a distinct color and the same shape as the points assigned to that cluster.
+# The centroid in a cluster has a distinct color but the same shape as the points assigned to that cluster.
 
 import statistics as st  # Perform statistical operations in data.
 import numpy as np  # numpy is used to perform a wide variety of mathematical operations on arrays.
@@ -46,14 +46,18 @@ class KMeansClusteringAlgorithm:
             y_coordinate_list_copy.remove(y_coordinate_list_copy[random_index])
         return centroid_list_x, centroid_list_y
 
-    def generate_plot(self, cluster_object_list):
+    def generate_scatter_plot(self, cluster_object_list):
+        cluster_sample_point_list = []
         for i1 in range(len(cluster_object_list)):
             cluster_coordinate_assignees_color = ColorRecord.get_available_color()
             cluster_centroid_color = ColorRecord.get_available_color()
             cluster_coordinate_shape = ShapeRecord.get_available_shape()
             for j1 in range(len(cluster_object_list[i1].x_coordinate_assignees)):
-                plt.scatter(cluster_object_list[i1].x_coordinate_assignees[j1], cluster_object_list[i1].y_coordinate_assignees[j1], c=cluster_coordinate_assignees_color, marker=cluster_coordinate_shape)
+                point = plt.scatter(cluster_object_list[i1].x_coordinate_assignees[j1], cluster_object_list[i1].y_coordinate_assignees[j1], c=cluster_coordinate_assignees_color, marker=cluster_coordinate_shape)
+                if j1 == 0:
+                    cluster_sample_point_list.append(point)
             plt.scatter(cluster_object_list[i1].centroid_x, cluster_object_list[i1].centroid_y, c=cluster_centroid_color, marker=cluster_coordinate_shape)
+        plt.legend(cluster_sample_point_list, ["Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4"], loc="lower right")
         plt.xlabel('Length')
         plt.ylabel('Width')
         plt.show()
@@ -126,7 +130,7 @@ class KMeansClusteringAlgorithm:
             self.update_total_change_in_centroid_positions(centroid_list_x, centroid_list_y, new_centroid_list_x, new_centroid_list_y)
             centroid_list_x = new_centroid_list_x.copy()
             centroid_list_y = new_centroid_list_y.copy()
-        self.generate_plot(cluster_object_list)
+        self.generate_scatter_plot(cluster_object_list)
 
 
 class ColorRecord:
