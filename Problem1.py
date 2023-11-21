@@ -27,6 +27,7 @@
 #   2. Directly based on the finding explained above, it is reasonable to conclude that using a cluster number of four causes under-clustering for the given dataset.
 #   3. Everytime I run the program, the positions of each centroid appear to be approximately at the center of their respective clusters. This is an indicator that the use of the minimum euclidean squared distance to assign data points to the closest cluster is a reasonable measure. In addition, it is evident that the computation of the mean vector of a cluster to recalculate centroid positions over multiple iterations is a reliable process for reaching the final centroid positions of each cluster.
 #   4. In summary, to improve the performance of this K-Means algorithm instance, a higher cluster number should be employed to increase the likelihood that resulting clusters will have very similar sizes.
+# TODO: Specify the significance of using a clustering number of 4 to determine which direction the clustering number should be adjusted (either increasing or decreasing)
 
 import statistics as st  # Perform statistical operations in data.
 import numpy as np  # numpy is used to perform a wide variety of mathematical operations on arrays.
