@@ -1,5 +1,5 @@
 # Logistic Regression and Regularization Algorithm
-
+import pandas as pd
 # Parts a, b, and c - implementation, training, and testing on chronic_kidney_disease dataset.
 
 # Referencing this resource to gain a better understanding of logistic regression: https://datatab.net/tutorial/logistic-regression
@@ -38,7 +38,7 @@
 #   Need to remove last column of @data chunk (ckd or notckd) FROM JUST THE TRAINING DATA as this gives the class of each data sample (kidney disease or not), which defeats the purpose of making predictions.
 #   Need to KEEP last column of @data chunk (ckd or notckd) in the TESTING DATA in order to compute the confusion matrix for calculating the f-measure.
 
-
+from scipy.io import arff
 import numpy as np
 from numpy import log, dot, e, shape
 import matplotlib.pyplot as plt
@@ -82,4 +82,26 @@ class LogisticRegressionAlgorithm:
     def run_algorithm(self, number_of_data_samples_by_number_of_features_per_data_sample_2d_array):
         if not self.use_standardization:
             self.train_using_gradient_descent(number_of_data_samples_by_number_of_features_per_data_sample_2d_array)
+            self.apply_regularization()
             self.make_predictions_using_test_data()
+            self.compute_confusion_matrix_using_testing_data()
+            self.compute_f_measure_using_confusion_matrix()
+        else:
+            self.train_using_gradient_descent(number_of_data_samples_by_number_of_features_per_data_sample_2d_array)
+            self.apply_regularization()
+            self.apply_standardization()
+            self.make_predictions_using_test_data()
+            self.compute_confusion_matrix_using_testing_data()
+            self.compute_f_measure_using_confusion_matrix()
+
+
+all_data = arff.loadarff('chronic_kidney_disease_full.arff')
+data_frame_for_all_data = pd.DataFrame(all_data[0])
+all_data_nd_array = data_frame_for_all_data.to_numpy()
+#  Need to perform replacement on non-numeric values in array and perform averages for question marks
+training_data_nd_array = all_data_nd_array.copy()
+np.delete(training_data_nd_array, 25, 0)
+
+
+
+
