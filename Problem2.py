@@ -91,10 +91,71 @@ data_frame_for_all_data = pd.DataFrame(all_data[0])
 
 # Substitute non-numeric values for numeric values in dataframe:
 
-def replace_non_numeric_values_in_rbc_column():
+def replace_non_numeric_values_in_rbc_column(value):
+    if value == 'normal':
+        return 0
+    elif value == 'abnormal':
+        return 1
+
+
+def replace_non_numeric_values_in_pc_column(value):
+    if value == 'normal':
+        return 0
+    elif value == 'abnormal':
+        return 1
+
+
+def replace_non_numeric_values_in_pcc_column(value):
+    if value == 'present':
+        return 1
+    elif value == 'notpresent':
+        return 0
+
+
+def replace_non_numeric_values_in_ba_column(value):
+    if value == 'present':
+        return 1
+    elif value == 'notpresent':
+        return 0
+
+
+def replace_non_numeric_values_in_htn_column(value):
+    if value == 'yes':
+        return 1
+    elif value == 'no':
+        return 0
+
+
+def replace_non_numeric_values_in_dm_column(value):
+    if value == 'yes':
+        return 1
+    elif value == 'no':
+        return 0
+
+
+def replace_non_numeric_values_in_cad_column(value):
+    if value == 'yes':
+        return 1
+    elif value == 'no':
+        return 0
+
+
+def replace_non_numeric_values_in_appet_column(value):
+    if value == 'good':
+        return 0
+    elif value == 'poor':
+        return 1
+
+
+def replace_non_numeric_values_in_pe_column(value):
     pass
 
-def replace_non_numeric_values_in_pc_column():
+
+def replace_non_numeric_values_in_ane_column(value):
+    pass
+
+
+def replace_non_numeric_values_in_class_column(value):
     pass
 
 
@@ -103,7 +164,26 @@ for (feature_name, feature_data) in data_frame_for_all_data.iteritems():
         data_frame_for_all_data['rbc'] = data_frame_for_all_data['rbc'].map(replace_non_numeric_values_in_rbc_column)
     elif feature_name == 'pc':
         data_frame_for_all_data['pc'] = data_frame_for_all_data['pc'].map(replace_non_numeric_values_in_pc_column)
-
+    elif feature_name == 'pcc':
+        data_frame_for_all_data['pcc'] = data_frame_for_all_data['pcc'].map(replace_non_numeric_values_in_pcc_column)
+    elif feature_name == 'ba':
+        data_frame_for_all_data['ba'] = data_frame_for_all_data['ba'].map(replace_non_numeric_values_in_ba_column)
+    elif feature_name == 'htn':
+        data_frame_for_all_data['htn'] = data_frame_for_all_data['htn'].map(replace_non_numeric_values_in_htn_column)
+    elif feature_name == 'dm':
+        data_frame_for_all_data['dm'] = data_frame_for_all_data['dm'].map(replace_non_numeric_values_in_dm_column)
+    elif feature_name == 'cad':
+        data_frame_for_all_data['cad'] = data_frame_for_all_data['cad'].map(replace_non_numeric_values_in_cad_column)
+    elif feature_name == 'appet':
+        data_frame_for_all_data['appet'] = data_frame_for_all_data['appet'].map(
+            replace_non_numeric_values_in_appet_column)
+    elif feature_name == 'pe':
+        data_frame_for_all_data['pe'] = data_frame_for_all_data['pe'].map(replace_non_numeric_values_in_pe_column)
+    elif feature_name == 'ane':
+        data_frame_for_all_data['ane'] = data_frame_for_all_data['ane'].map(replace_non_numeric_values_in_ane_column)
+    elif feature_name == 'class':
+        data_frame_for_all_data['class'] = data_frame_for_all_data['class'].map(
+            replace_non_numeric_values_in_class_column)
 
 # Substitute question marks for numeric values in dataframe:
 
