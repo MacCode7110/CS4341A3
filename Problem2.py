@@ -1,5 +1,5 @@
 # Logistic Regression and Regularization Algorithm
-import pandas as pd
+
 # Parts a, b, and c - implementation, training, and testing on chronic_kidney_disease dataset.
 
 # Referencing this resource to gain a better understanding of logistic regression: https://datatab.net/tutorial/logistic-regression
@@ -9,36 +9,24 @@ import pandas as pd
 # Classification is a part of supervised machine learning that predicts which category some observation (the dataset linked to the given entity) belongs to based on its features.
 # Regularization attempts to limit the complexity of the data model (prevent overfitting of data and improve generalization of newly introduced data).
 
-# Questions for OH 11/20/23:
-#   1. What exactly is the weighted sum of input features? What values are exactly in this equation?
-#       In the 2D array where samples are rows and feature variables are columns, each box (value for the current sample and feature) is going to be multiplied by a DIFFERENT WEIGHT calculated for that box.
-#       After each box of the 2D array has been multiplied by a SPECIFICALLY CALCULATED weight, then the bias is added at the end to the weighted sum of input feature values to finish the calculation.
-#       We need to determine how important each feature value is to determining the probability a sample belongs to a class. In order to this, different weights need to be applied to different samples.
-#       The calculation is then plugged into the sigmoid function, 1 / (1 + e^-x).
-#   2. How should we handle the question marks in the sample data? Do these question marks factor into the weighted sum of input features?
-#       Could you put zeroes in for the question marks? Maybe. This would skew the data.
-#       Better approach with the assumption that all the data is similar: Take the average of all the values in the current column (feature), and assign that average to replace the current question mark.
-#   2. How should we handle non-numeric values in the sum of weighted sum of inputs calculation? (If we are handling actual data values).
-#       For non-numeric values, denote either a 0 or a 1 (given that the non-numeric value is part of a binary outcome) to represent that non-numeric values.
-#   3. Clarify: Is this a multiple logistic regression model problem?
-#       Yes
-#   4. How should we go about plotting the f-measure and what exactly does this plot look like?
-#       Plotting the f-measure is ONLY based on the testing data. Regularization parameters go on the x-axis, and the f-measure (how accurate the class predictions are) go on the y-axis.
-#       Need to compute a confusion matrix to find the true positives, true negatives, false positive, false negatives in the testing data.
-#       Use equation for f-measure to compute y-axis of graph. f-measure equation is dependent on the true positives, true negatives, false positives, and false negatives.
-#       How to run this algorithm for multiple regularization parameters:
-#           Loop through all the regularization parameters (create a list):
-#               For each regularization parameter, go through ALL the steps in the logistic regression AND call the scatter function to scatter the data for the f-measure.
-#           After f-measures have been scattered for each regularization parameter, finally show the resulting scatter plot.
-#   6. Should regularization be used with the standardization protocol?
-#       Yes, we need regularization to plot the f-measure, and this must be done with the standardization protocol.
-#       We can plot the f-measures as a result of standardization with regularization on the same plot as the one scattered through just using regularization. No need to create separate runs for this problem.
-
-#   Definitely use a Numpy array to store the data. Samples make up the rows and features make up the columns.
-#   Need to remove last column of @data chunk (ckd or notckd) FROM JUST THE TRAINING DATA as this gives the class of each data sample (kidney disease or not), which defeats the purpose of making predictions.
-#   Need to KEEP last column of @data chunk (ckd or notckd) in the TESTING DATA in order to compute the confusion matrix for calculating the f-measure.
+# In the chronic_kidney_disease_full.arff file, here is how I have decided that non-numeric values and question marks are handled and manipulated so that the logistic regression works properly:
+#   1. Question marks:
+#       A. All question marks are replaced with the current average value for that feature.
+#   2. Non-numeric values (listed by feature/attribute):
+#       A. 'rbc', index 5: normal -> 0, abnormal -> 1
+#       B. 'pc', index 6: normal -> 0, abnormal -> 1
+#       C. 'pcc', index 7: present -> 1, notpresent -> 0
+#       D. 'ba', index 8: present -> 1, notpresent -> 0
+#       E. 'htn', index 18: yes -> 1, no -> 0
+#       F. 'dm', index 19: yes -> 1, no -> 0
+#       G. 'cad', index 20: yes -> 1, no -> 0
+#       H. 'appet', index 21: good -> 0, poor -> 1
+#       I. 'pe', index 22: yes -> 1, no -> 0
+#       J. 'ane', index 23: yes -> 1, no -> 0
+#       K. 'class', index 24: ckd -> 1, notckd -> 0
 
 from scipy.io import arff
+import pandas as pd
 import numpy as np
 from numpy import log, dot, e, shape
 import matplotlib.pyplot as plt
@@ -95,13 +83,30 @@ class LogisticRegressionAlgorithm:
             self.compute_f_measure_using_confusion_matrix()
 
 
+# Process the data:
+
 all_data = arff.loadarff('chronic_kidney_disease_full.arff')
 data_frame_for_all_data = pd.DataFrame(all_data[0])
+
+
+# Substitute non-numeric values for numeric values in dataframe:
+
+def replace_non_numeric_values_in_rbc_column():
+    pass
+
+def replace_non_numeric_values_in_pc_column():
+    pass
+
+
+for (feature_name, feature_data) in data_frame_for_all_data.iteritems():
+    if feature_name == 'rbc':
+        data_frame_for_all_data['rbc'] = data_frame_for_all_data['rbc'].map(replace_non_numeric_values_in_rbc_column)
+    elif feature_name == 'pc':
+        data_frame_for_all_data['pc'] = data_frame_for_all_data['pc'].map(replace_non_numeric_values_in_pc_column)
+
+
+# Substitute question marks for numeric values in dataframe:
+
 all_data_nd_array = data_frame_for_all_data.to_numpy()
-#  Need to perform replacement on non-numeric values in array and perform averages for question marks
-training_data_nd_array = all_data_nd_array.copy()
-np.delete(training_data_nd_array, 25, 0)
-
-
-
-
+nd_array_for_training_data_processing = all_data_nd_array.copy()
+modified_nd_array_for_training_data_processing = np.delete(nd_array_for_training_data_processing, 24, 1)
