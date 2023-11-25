@@ -11,7 +11,7 @@
 
 # In the chronic_kidney_disease_full.arff file, here is how I have decided that non-numeric values and question marks are handled and manipulated so that the logistic regression works properly:
 #   1. Question marks:
-#       A. All question marks are replaced with the current average value for that feature.
+#       A. All question marks are replaced with the current average value (mean) for that feature, which operates under the assumption that each column contains similar data.
 #   2. Non-numeric values (listed by feature/attribute):
 #       A. 'rbc', index 5: normal -> 0, abnormal -> 1
 #       B. 'pc', index 6: normal -> 0, abnormal -> 1
@@ -30,7 +30,7 @@ import pandas as pd
 import numpy as np
 from numpy import log, dot, e, shape
 import matplotlib.pyplot as plt
-
+from sklearn.model_selection import train_test_split
 
 class LogisticRegressionAlgorithm:
     def __init__(self, learning_rate, number_of_iterations_for_gradient_descent, regularization_parameter,
@@ -86,46 +86,76 @@ class LogisticRegressionAlgorithm:
 # Process the data:
 
 all_data = arff.loadarff('chronic_kidney_disease_full.arff')
-data_frame_for_all_data = pd.DataFrame(all_data[0])
+dataframe_for_all_data = pd.DataFrame(all_data[0])
 chronic_kidney_disease_data_columns_using_byte_strings = ['rbc', 'pc', 'pcc', 'ba', 'htn', 'dm', 'cad', 'appet', 'pe',
                                                           'ane', 'class']
 
 # Pandas dataframe uses byte strings to represent strings by default. These byte strings need to be decoded into regular strings for the applicable columns:
 
 for i1 in range(len(chronic_kidney_disease_data_columns_using_byte_strings)):
-    data_frame_for_all_data[chronic_kidney_disease_data_columns_using_byte_strings[i1]] = data_frame_for_all_data[
+    dataframe_for_all_data[chronic_kidney_disease_data_columns_using_byte_strings[i1]] = dataframe_for_all_data[
         chronic_kidney_disease_data_columns_using_byte_strings[i1]].str.decode("utf-8")
 
-# Substitute non-numeric values for numeric values in dataframe:
+# 1. Substitute non-numeric string values for numeric values in dataframe:
+# 2. Substitute non-numeric nominal integers and floats for numeric values in dataframe:
 
-for (feature_name, feature_data) in data_frame_for_all_data.items():
+for (feature_name, feature_data) in dataframe_for_all_data.items():
     if feature_name == 'rbc':
-        pass
+        dataframe_for_all_data.replace({feature_name: {'normal': '0', 'abnormal': '1'}}, inplace=True)
+        dataframe_for_all_data[feature_name] = pd.to_numeric(dataframe_for_all_data[feature_name], errors='coerce')
     elif feature_name == 'pc':
-        pass
+        dataframe_for_all_data.replace({feature_name: {'normal': '0', 'abnormal': '1'}}, inplace=True)
+        dataframe_for_all_data[feature_name] = pd.to_numeric(dataframe_for_all_data[feature_name], errors='coerce')
     elif feature_name == 'pcc':
-        pass
+        dataframe_for_all_data.replace({feature_name: {'present': '1', 'notpresent': '0'}}, inplace=True)
+        dataframe_for_all_data[feature_name] = pd.to_numeric(dataframe_for_all_data[feature_name], errors='coerce')
     elif feature_name == 'ba':
-        pass
+        dataframe_for_all_data.replace({feature_name: {'present': '1', 'notpresent': '0'}}, inplace=True)
+        dataframe_for_all_data[feature_name] = pd.to_numeric(dataframe_for_all_data[feature_name], errors='coerce')
     elif feature_name == 'htn':
-        pass
+        dataframe_for_all_data.replace({feature_name: {'yes': '1', 'no': '0'}}, inplace=True)
+        dataframe_for_all_data[feature_name] = pd.to_numeric(dataframe_for_all_data[feature_name], errors='coerce')
     elif feature_name == 'dm':
-        pass
+        dataframe_for_all_data.replace({feature_name: {'yes': '1', 'no': '0'}}, inplace=True)
+        dataframe_for_all_data[feature_name] = pd.to_numeric(dataframe_for_all_data[feature_name], errors='coerce')
     elif feature_name == 'cad':
-        pass
+        dataframe_for_all_data.replace({feature_name: {'yes': '1', 'no': '0'}}, inplace=True)
+        dataframe_for_all_data[feature_name] = pd.to_numeric(dataframe_for_all_data[feature_name], errors='coerce')
     elif feature_name == 'appet':
-        data_frame_for_all_data.replace({'appet': {'good': 0, 'poor': 1}}, inplace=True)
+        dataframe_for_all_data.replace({feature_name: {'good': '0', 'poor': '1'}}, inplace=True)
+        dataframe_for_all_data[feature_name] = pd.to_numeric(dataframe_for_all_data[feature_name], errors='coerce')
     elif feature_name == 'pe':
-        data_frame_for_all_data.replace({'pe': {'yes': 1, 'no': 0}}, inplace=True)
+        dataframe_for_all_data.replace({feature_name: {'yes': '1', 'no': '0'}}, inplace=True)
+        dataframe_for_all_data[feature_name] = pd.to_numeric(dataframe_for_all_data[feature_name], errors='coerce')
     elif feature_name == 'ane':
-        data_frame_for_all_data.replace({'ane': {'yes': 1, 'no': 0}}, inplace=True)
+        dataframe_for_all_data.replace({feature_name: {'yes': '1', 'no': '0'}}, inplace=True)
+        dataframe_for_all_data[feature_name] = pd.to_numeric(dataframe_for_all_data[feature_name], errors='coerce')
     elif feature_name == 'class':
-        data_frame_for_all_data.replace({'class': {'ckd': 1, 'notckd': 0}}, inplace=True)
+        dataframe_for_all_data.replace({feature_name: {'ckd': '1', 'notckd': '0'}}, inplace=True)
+        dataframe_for_all_data[feature_name] = pd.to_numeric(dataframe_for_all_data[feature_name], errors='coerce')
+    elif feature_name == 'sg':
+        dataframe_for_all_data[feature_name] = pd.to_numeric(dataframe_for_all_data[feature_name], errors='coerce')
+    elif feature_name == 'al':
+        dataframe_for_all_data[feature_name] = pd.to_numeric(dataframe_for_all_data[feature_name], errors='coerce')
+    elif feature_name == 'su':
+        dataframe_for_all_data[feature_name] = pd.to_numeric(dataframe_for_all_data[feature_name], errors='coerce')
 
-# Substitute question marks for numeric values in dataframe:
+# Substitute NAN (forced from question marks via errors=coerce argument) for numeric averages in dataframe:
 
-print(data_frame_for_all_data)
+for (feature_name, feature_data) in dataframe_for_all_data.items():
+    dataframe_for_all_data[feature_name].fillna(value=dataframe_for_all_data[feature_name].mean(), inplace=True)
 
-all_data_nd_array = data_frame_for_all_data.to_numpy()
-nd_array_for_training_data_processing = all_data_nd_array.copy()
-modified_nd_array_for_training_data_processing = np.delete(nd_array_for_training_data_processing, 24, 1)
+# Split the data into 80% training data and 20% testing data:
+
+dataframe_for_all_data_copy = dataframe_for_all_data.copy()
+training_data, testing_data = train_test_split(dataframe_for_all_data_copy, test_size=0.2, shuffle=True)
+# Need to remove class column from training data so logistic regression works as intended:
+training_data.drop('class', inplace=True, axis=1)
+
+# Convert training and testing data to Numpy arrays:
+
+training_data_nd_array = training_data.to_numpy()
+testing_data_nd_array = testing_data.to_numpy()
+
+
+
