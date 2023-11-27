@@ -49,7 +49,9 @@ import matplotlib.pyplot as plt
 
 
 class LogisticRegressionAlgorithm:
-    def __init__(self, learning_rate, number_of_iterations_for_gradient_descent, regularization_parameter, using_standardization):
+
+    def __init__(self, learning_rate, number_of_iterations_for_gradient_descent, regularization_parameter,
+                 using_standardization):
         self.learning_rate = learning_rate
         self.number_of_iterations = number_of_iterations_for_gradient_descent
         self.regularization_parameter = regularization_parameter
@@ -75,11 +77,11 @@ class LogisticRegressionAlgorithm:
 
             # Recalculate (cost function * derivatives) for training weights and bias. For the following dot product to work correctly, we need to transpose the feature_data_nd_array so that features are the rows and samples are the columns:
             cost_function_multiplied_by_derivative_result = (1 / number_of_data_samples) * (
-                    np.dot(feature_data_nd_array.T, (chronic_kidney_disease_probability_prediction - target_data_nd_array)))
-            # (self.regularization_parameter * self.training_weights))
+                np.dot(feature_data_nd_array.T, (chronic_kidney_disease_probability_prediction - target_data_nd_array)) + (self.regularization_parameter * self.training_weights))
             adjustment_for_bias = (1 / number_of_data_samples) * np.sum(
                 chronic_kidney_disease_probability_prediction - target_data_nd_array)
-            print("Cost calculation for iteration " + str(iteration_index) + " using regularization parameter " + str(self.regularization_parameter) + " is " + str(cost_calculation))
+            print("Cost calculation for iteration " + str(iteration_index) + " using regularization parameter " + str(
+                self.regularization_parameter) + " is " + str(cost_calculation))
 
             # Update the training weights and bias:
             self.training_weights = self.training_weights - (
@@ -109,19 +111,19 @@ class LogisticRegressionAlgorithm:
                 # 1 is positive for chronic kidney disease, 0 is negative for chronic kidney disease
                 # (0, 0) = TP, (0, 1) = FP, (1, 0) = FN, (1, 1) = TN
                 if chronic_kidney_disease_class_predictions[prediction_index_x][prediction_index_y] == 1 and int(
-                    target_data_nd_array[prediction_index_x]) == 1:
+                        target_data_nd_array[prediction_index_x]) == 1:
                     # True positive
                     confusion_matrix[0, 0] += 1
                 elif chronic_kidney_disease_class_predictions[prediction_index_x][prediction_index_y] == 1 and int(
-                    target_data_nd_array[prediction_index_x]) == 0:
+                        target_data_nd_array[prediction_index_x]) == 0:
                     # False positive
                     confusion_matrix[0, 1] += 1
                 elif chronic_kidney_disease_class_predictions[prediction_index_x][prediction_index_y] == 0 and int(
-                    target_data_nd_array[prediction_index_x]) == 0:
+                        target_data_nd_array[prediction_index_x]) == 0:
                     # True negative
                     confusion_matrix[1, 1] += 1
                 elif chronic_kidney_disease_class_predictions[prediction_index_x][prediction_index_y] == 0 and int(
-                    target_data_nd_array[prediction_index_x]) == 1:
+                        target_data_nd_array[prediction_index_x]) == 1:
                     # False negative
                     confusion_matrix[1, 0] += 1
 
@@ -134,7 +136,7 @@ class LogisticRegressionAlgorithm:
         f_measure = (2 * precision * recall) / (precision + recall)
         return f_measure
 
-    def generate_scatter_plot(self, f_measure, show_plot):
+    def draw_scatter_plot(self, f_measure, show_plot):
         if not self.using_standardization:
             plt.scatter(self.regularization_parameter, f_measure, c='b')
         else:
@@ -143,7 +145,7 @@ class LogisticRegressionAlgorithm:
         if show_plot:
             plt.xlabel('Regularization Parameter')
             plt.ylabel('f-measure')
-            plt.legend(["Red Dots", "Blue Dots"], ["Standardized Data", "Data Without Standardization"], loc="lower right")
+            plt.legend(["Data Without Standardization", "Standardized Data"], loc="lower right")
             plt.show()
 
     def run_algorithm(self, feature_data_nd_array, target_data_nd_array, run_on_training_data, show_plot):
@@ -152,7 +154,7 @@ class LogisticRegressionAlgorithm:
             confusion_matrix = self.compute_confusion_matrix_using_predictions(chronic_kidney_disease_class_predictions,
                                                                                target_data_nd_array)
             f_measure = self.compute_f_measure_using_confusion_matrix(confusion_matrix)
-            self.generate_scatter_plot(f_measure, show_plot)
+            self.draw_scatter_plot(f_measure, show_plot)
         else:
             self.train_using_gradient_descent_and_l2_regularization(feature_data_nd_array, target_data_nd_array)
 
@@ -259,16 +261,19 @@ standardized_testing_data_x_nd_array = apply_standardization_to_data(testing_dat
 # Run the logistic regression algorithm for a range of -2 to 4 with a step of 0.2:
 dynamic_learning_rate = 0.001
 show_scatter_plot = False
-regularization_parameter_list = [-2, -1.8, -1.6, -1.4, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4, 3.6, 3.8, 4.0]
+regularization_parameter_list = [-2, -1.8, -1.6, -1.4, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0,
+                                 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4, 3.6, 3.8, 4.0]
 for regularization_index in range(len(regularization_parameter_list)):
 
-    lra1 = LogisticRegressionAlgorithm(dynamic_learning_rate, 1000, regularization_parameter_list[regularization_index], False)
+    lra1 = LogisticRegressionAlgorithm(dynamic_learning_rate, 1000, regularization_parameter_list[regularization_index],
+                                       False)
     # Run on training without standardization
     lra1.run_algorithm(training_data_x_nd_array, training_data_y_nd_array, True, show_scatter_plot)
     # Run on testing without standardization
     lra1.run_algorithm(testing_data_x_nd_array, testing_data_y_nd_array, False, show_scatter_plot)
 
-    lra2 = LogisticRegressionAlgorithm(dynamic_learning_rate, 1000, regularization_parameter_list[regularization_index], True)
+    lra2 = LogisticRegressionAlgorithm(dynamic_learning_rate, 1000, regularization_parameter_list[regularization_index],
+                                       True)
     # Run on training with standardization
     lra2.run_algorithm(standardized_training_data_x_nd_array, training_data_y_nd_array, True, show_scatter_plot)
 
