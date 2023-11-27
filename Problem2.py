@@ -8,6 +8,7 @@
 # Logistic regression predicts the probability of an observation belonging to a certain class or label.
 # Classification is a part of supervised machine learning that predicts which category some observation (the dataset linked to the given entity) belongs to based on its features.
 # Regularization attempts to limit the complexity of the data model (prevent overfitting of data and improve generalization of newly introduced data).
+# This program uses L2 Regularization
 
 # In the chronic_kidney_disease_full.arff file, here is how I have decided that non-numeric values and question marks are handled and manipulated so that the logistic regression works properly:
 #   1. Question marks:
@@ -25,62 +26,146 @@
 #       J. 'ane', index 23: yes -> 1, no -> 0
 #       K. 'class', index 24: ckd -> 1, notckd -> 0
 
-from scipy.io import arff
-import pandas as pd
+# When calculating the confusion matrix, 1 represents positive for chronic kidney disease, and 0 represents negative for chronic kidney disease.
+# The confusion matrix takes the following form:
+#                                   Actual Class
+#                                Positive  Negative
+#   Predicted Class | Positive   |  TP   |  FP   |
+#                               -------------------
+#                   | Negative   |  FN   |  TN   |
+#
+#  (0, 0) = TP, (0, 1) = FP, (1, 0) = FN, (1, 1) = TN
+
+# In the f-measure scatterplot, red dots are those produced using standardized data, and blue dots are those produced using non-standardized data.
+
+# Office Hours 11/27:
+# Does cost function actually factor in at all to the final gradient equation?
+
 import numpy as np
-from numpy import log, dot, e, shape
-import matplotlib.pyplot as plt
+import pandas as pd
+from scipy.io import arff
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+
 
 class LogisticRegressionAlgorithm:
-    def __init__(self, learning_rate, number_of_iterations_for_gradient_descent, regularization_parameter,
-                 use_standardization):
+    def __init__(self, learning_rate, number_of_iterations_for_gradient_descent, regularization_parameter, using_standardization):
         self.learning_rate = learning_rate
         self.number_of_iterations = number_of_iterations_for_gradient_descent
         self.regularization_parameter = regularization_parameter
-        self.use_standardization = use_standardization
         self.training_weights = []
         self.bias = 0
+        self.using_standardization = using_standardization
 
-    def train_using_gradient_descent(self, number_of_data_samples_by_number_of_features_2d_array):
-        number_of_data_samples, number_of_features = number_of_data_samples_by_number_of_features_2d_array.shape
-        weighted_sum_of_input_features = 0
+    def train_using_gradient_descent_and_l2_regularization(self, feature_data_nd_array, target_data_nd_array):
+        number_of_data_samples, number_of_features = np.shape(feature_data_nd_array)
+        self.training_weights = np.zeros((number_of_features, number_of_data_samples))
 
-        for i1 in range(len(number_of_features)):
-            self.training_weights.append(0)
+        for iteration_index in range(self.number_of_iterations):
+            # Take the dot product of the data_nd_array with a series of weights to perform gradient descent. Each entry in the feature data is multiplied by a particular weight:
+            weighted_sum_of_input_features = np.dot(feature_data_nd_array, self.training_weights) + self.bias
+            # Get the regularization expression:
+            complexity_multiplied_by_regularization_parameter_result = self.regularization_parameter * np.sum(
+                np.square(self.training_weights))
+            # Compute predictions of chronic kidney disease using sigmoid function:
+            chronic_kidney_disease_probability_prediction = 1 / (1 + np.exp(-weighted_sum_of_input_features))
+            # Calculate the loss/cost equation:
+            cost_calculation = ((1 / (2 * number_of_data_samples)) * np.sum(np.square(
+                chronic_kidney_disease_probability_prediction - target_data_nd_array))) + complexity_multiplied_by_regularization_parameter_result
 
-        for i2 in range(len(self.number_of_iterations)):
-            pass
+            # Recalculate (cost function * derivatives) for training weights and bias. For the following dot product to work correctly, we need to transpose the feature_data_nd_array so that features are the rows and samples are the columns:
+            cost_function_multiplied_by_derivative_result = (1 / number_of_data_samples) * (
+                    np.dot(feature_data_nd_array.T, (chronic_kidney_disease_probability_prediction - target_data_nd_array)))
+            # (self.regularization_parameter * self.training_weights))
+            adjustment_for_bias = (1 / number_of_data_samples) * np.sum(
+                chronic_kidney_disease_probability_prediction - target_data_nd_array)
+            print("Cost calculation for iteration " + str(iteration_index) + " using regularization parameter " + str(self.regularization_parameter) + " is " + str(cost_calculation))
 
-    def apply_regularization(self):
-        pass
+            # Update the training weights and bias:
+            self.training_weights = self.training_weights - (
+                    self.learning_rate * cost_function_multiplied_by_derivative_result)
+            self.bias = self.bias - (self.learning_rate * adjustment_for_bias)
 
-    def apply_standardization(self):
-        pass
+    def make_predictions_using_test_data(self, testing_data_nd_array):
+        weighted_sum_of_input_features = np.dot(testing_data_nd_array, self.training_weights) + self.bias
+        chronic_kidney_disease_probability_predictions = 1 / (1 + np.exp(-weighted_sum_of_input_features))
+        number_of_rows, number_of_columns = np.shape(chronic_kidney_disease_probability_predictions)
+        chronic_kidney_disease_class_predictions = np.zeros((number_of_rows, number_of_columns))
 
-    def make_predictions_using_test_data(self):
-        pass
+        for prediction_index_x in range(len(chronic_kidney_disease_probability_predictions)):
+            for prediction_index_y in range(len(chronic_kidney_disease_probability_predictions[prediction_index_x])):
+                if chronic_kidney_disease_probability_predictions[prediction_index_x][prediction_index_y] > 0.5:
+                    chronic_kidney_disease_class_predictions[prediction_index_x][prediction_index_y] = 1
+                else:
+                    chronic_kidney_disease_class_predictions[prediction_index_x][prediction_index_y] = 0
 
-    def compute_confusion_matrix_using_testing_data(self):
-        pass
+        return chronic_kidney_disease_class_predictions
 
-    def compute_f_measure_using_confusion_matrix(self):
-        pass
+    @staticmethod
+    def compute_confusion_matrix_using_predictions(chronic_kidney_disease_class_predictions, target_data_nd_array):
+        confusion_matrix = np.zeros((2, 2))
+        for prediction_index_x in range(len(chronic_kidney_disease_class_predictions)):
+            for prediction_index_y in range(len(chronic_kidney_disease_class_predictions[prediction_index_x])):
+                # 1 is positive for chronic kidney disease, 0 is negative for chronic kidney disease
+                # (0, 0) = TP, (0, 1) = FP, (1, 0) = FN, (1, 1) = TN
+                if chronic_kidney_disease_class_predictions[prediction_index_x][prediction_index_y] == 1 and int(
+                    target_data_nd_array[prediction_index_x]) == 1:
+                    # True positive
+                    confusion_matrix[0, 0] += 1
+                elif chronic_kidney_disease_class_predictions[prediction_index_x][prediction_index_y] == 1 and int(
+                    target_data_nd_array[prediction_index_x]) == 0:
+                    # False positive
+                    confusion_matrix[0, 1] += 1
+                elif chronic_kidney_disease_class_predictions[prediction_index_x][prediction_index_y] == 0 and int(
+                    target_data_nd_array[prediction_index_x]) == 0:
+                    # True negative
+                    confusion_matrix[1, 1] += 1
+                elif chronic_kidney_disease_class_predictions[prediction_index_x][prediction_index_y] == 0 and int(
+                    target_data_nd_array[prediction_index_x]) == 1:
+                    # False negative
+                    confusion_matrix[1, 0] += 1
 
-    def run_algorithm(self, number_of_data_samples_by_number_of_features_per_data_sample_2d_array):
-        if not self.use_standardization:
-            self.train_using_gradient_descent(number_of_data_samples_by_number_of_features_per_data_sample_2d_array)
-            self.apply_regularization()
-            self.make_predictions_using_test_data()
-            self.compute_confusion_matrix_using_testing_data()
-            self.compute_f_measure_using_confusion_matrix()
+        return confusion_matrix
+
+    @staticmethod
+    def compute_f_measure_using_confusion_matrix(confusion_matrix):
+        precision = confusion_matrix[0, 0] / (confusion_matrix[0, 0] + confusion_matrix[0, 1])
+        recall = confusion_matrix[0, 0] / (confusion_matrix[0, 0] + confusion_matrix[1, 0])
+        f_measure = (2 * precision * recall) / (precision + recall)
+        return f_measure
+
+    def generate_scatter_plot(self, f_measure, show_plot):
+        if not self.using_standardization:
+            plt.scatter(self.regularization_parameter, f_measure, c='b')
         else:
-            self.train_using_gradient_descent(number_of_data_samples_by_number_of_features_per_data_sample_2d_array)
-            self.apply_regularization()
-            self.apply_standardization()
-            self.make_predictions_using_test_data()
-            self.compute_confusion_matrix_using_testing_data()
-            self.compute_f_measure_using_confusion_matrix()
+            plt.scatter(self.regularization_parameter, f_measure, c='r')
+
+        if show_plot:
+            plt.xlabel('Regularization Parameter')
+            plt.ylabel('f-measure')
+            plt.legend(["Red Dots", "Blue Dots"], ["Standardized Data", "Data Without Standardization"], loc="lower right")
+            plt.show()
+
+    def run_algorithm(self, feature_data_nd_array, target_data_nd_array, run_on_training_data, show_plot):
+        if not run_on_training_data:
+            chronic_kidney_disease_class_predictions = self.make_predictions_using_test_data(feature_data_nd_array)
+            confusion_matrix = self.compute_confusion_matrix_using_predictions(chronic_kidney_disease_class_predictions,
+                                                                               target_data_nd_array)
+            f_measure = self.compute_f_measure_using_confusion_matrix(confusion_matrix)
+            self.generate_scatter_plot(f_measure, show_plot)
+        else:
+            self.train_using_gradient_descent_and_l2_regularization(feature_data_nd_array, target_data_nd_array)
+
+
+# Using standardization formula from slides: xi = (xi - mean of training_data) / standard deviation of training data. This standardization formula is applied for each column using the [:, feature_array_index] notation, which selects a particular column (subarray):
+def apply_standardization_to_data(feature_data_nd_array):
+    updated_feature_nd_array = np.copy(feature_data_nd_array)
+    number_of_features = np.shape(updated_feature_nd_array)[1]
+    for feature_array_index in range(number_of_features):
+        updated_feature_nd_array[:, feature_array_index] = (updated_feature_nd_array[:, feature_array_index] - np.mean(
+            updated_feature_nd_array[:, feature_array_index])) / np.std(
+            updated_feature_nd_array[:, feature_array_index])
+    return updated_feature_nd_array
 
 
 # Process the data:
@@ -89,15 +174,17 @@ all_data = arff.loadarff('chronic_kidney_disease_full.arff')
 dataframe_for_all_data = pd.DataFrame(all_data[0])
 chronic_kidney_disease_data_columns_using_byte_strings = ['rbc', 'pc', 'pcc', 'ba', 'htn', 'dm', 'cad', 'appet', 'pe',
                                                           'ane', 'class']
+feature_name_list = []
 
 # Pandas dataframe uses byte strings to represent strings by default. These byte strings need to be decoded into regular strings for the applicable columns:
 
-for i1 in range(len(chronic_kidney_disease_data_columns_using_byte_strings)):
-    dataframe_for_all_data[chronic_kidney_disease_data_columns_using_byte_strings[i1]] = dataframe_for_all_data[
-        chronic_kidney_disease_data_columns_using_byte_strings[i1]].str.decode("utf-8")
+for data_index in range(len(chronic_kidney_disease_data_columns_using_byte_strings)):
+    dataframe_for_all_data[chronic_kidney_disease_data_columns_using_byte_strings[data_index]] = dataframe_for_all_data[
+        chronic_kidney_disease_data_columns_using_byte_strings[data_index]].str.decode("utf-8")
 
 # 1. Substitute non-numeric string values for numeric values in dataframe:
 # 2. Substitute non-numeric nominal integers and floats for numeric values in dataframe:
+# 3. Get a list of feature names from the data:
 
 for (feature_name, feature_data) in dataframe_for_all_data.items():
     if feature_name == 'rbc':
@@ -140,6 +227,11 @@ for (feature_name, feature_data) in dataframe_for_all_data.items():
     elif feature_name == 'su':
         dataframe_for_all_data[feature_name] = pd.to_numeric(dataframe_for_all_data[feature_name], errors='coerce')
 
+    feature_name_list.append(feature_name)
+
+# Remove 'class' feature from feature_name_list:
+feature_name_list.remove(feature_name_list[len(feature_name_list) - 1])
+
 # Substitute NAN (forced from question marks via errors=coerce argument) for numeric averages in dataframe:
 
 for (feature_name, feature_data) in dataframe_for_all_data.items():
@@ -148,14 +240,43 @@ for (feature_name, feature_data) in dataframe_for_all_data.items():
 # Split the data into 80% training data and 20% testing data:
 
 dataframe_for_all_data_copy = dataframe_for_all_data.copy()
-training_data, testing_data = train_test_split(dataframe_for_all_data_copy, test_size=0.2, shuffle=True)
-# Need to remove class column from training data so logistic regression works as intended:
-training_data.drop('class', inplace=True, axis=1)
+feature_dataframe = dataframe_for_all_data_copy.loc[:, feature_name_list]
+target_dataframe = dataframe_for_all_data_copy.loc[:, ['class']]
+
+training_data_x, testing_data_x, training_data_y, testing_data_y = train_test_split(feature_dataframe, target_dataframe,
+                                                                                    train_size=0.8, shuffle=True)
 
 # Convert training and testing data to Numpy arrays:
 
-training_data_nd_array = training_data.to_numpy()
-testing_data_nd_array = testing_data.to_numpy()
+training_data_x_nd_array = training_data_x.to_numpy()
+testing_data_y_nd_array = testing_data_y.to_numpy()
+training_data_y_nd_array = training_data_y.to_numpy()
+testing_data_x_nd_array = testing_data_x.to_numpy()
 
+standardized_training_data_x_nd_array = apply_standardization_to_data(training_data_x_nd_array)
+standardized_testing_data_x_nd_array = apply_standardization_to_data(testing_data_x_nd_array)
 
+# Run the logistic regression algorithm for a range of -2 to 4 with a step of 0.2:
+dynamic_learning_rate = 0.001
+show_scatter_plot = False
+regularization_parameter_list = [-2, -1.8, -1.6, -1.4, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4, 3.6, 3.8, 4.0]
+for regularization_index in range(len(regularization_parameter_list)):
 
+    lra1 = LogisticRegressionAlgorithm(dynamic_learning_rate, 1000, regularization_parameter_list[regularization_index], False)
+    # Run on training without standardization
+    lra1.run_algorithm(training_data_x_nd_array, training_data_y_nd_array, True, show_scatter_plot)
+    # Run on testing without standardization
+    lra1.run_algorithm(testing_data_x_nd_array, testing_data_y_nd_array, False, show_scatter_plot)
+
+    lra2 = LogisticRegressionAlgorithm(dynamic_learning_rate, 1000, regularization_parameter_list[regularization_index], True)
+    # Run on training with standardization
+    lra2.run_algorithm(standardized_training_data_x_nd_array, training_data_y_nd_array, True, show_scatter_plot)
+
+    if regularization_parameter_list[regularization_index] == 4:
+        show_scatter_plot = True
+
+    # Run on testing with standardization
+    lra2.run_algorithm(standardized_testing_data_x_nd_array, testing_data_y_nd_array, False, show_scatter_plot)
+
+    # Multiply the learning rate by 10 at the end of each regularization parameter usage
+    dynamic_learning_rate = dynamic_learning_rate * 10
