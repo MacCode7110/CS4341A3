@@ -2,7 +2,9 @@
 
 # Parts a, b, and c - implementation, training, and testing on chronic_kidney_disease dataset.
 
-# Referencing this resource to gain a better understanding of logistic regression: https://datatab.net/tutorial/logistic-regression
+# Referencing the following resources to gain a better understanding of logistic regression:
+# https://datatab.net/tutorial/logistic-regression
+#
 
 # Logistic regression is a machine learning algorithm used for binary classification, and it models a binary dependent variable.
 # Logistic regression predicts the probability of an observation belonging to a certain class or label.
@@ -50,9 +52,9 @@ import matplotlib.pyplot as plt
 
 class LogisticRegressionAlgorithm:
 
-    def __init__(self, learning_rate, number_of_iterations_for_gradient_descent, regularization_parameter,
+    def __init__(self, algorithm_learning_rate, number_of_iterations_for_gradient_descent, regularization_parameter,
                  using_standardization):
-        self.learning_rate = learning_rate
+        self.learning_rate = algorithm_learning_rate
         self.number_of_iterations = number_of_iterations_for_gradient_descent
         self.regularization_parameter = regularization_parameter
         self.training_weights = []
@@ -76,8 +78,8 @@ class LogisticRegressionAlgorithm:
                 chronic_kidney_disease_probability_prediction - target_data_nd_array))) + complexity_multiplied_by_regularization_parameter_result
 
             # Recalculate (cost function * derivatives) for training weights and bias. For the following dot product to work correctly, we need to transpose the feature_data_nd_array so that features are the rows and samples are the columns:
-            cost_function_multiplied_by_derivative_result = (1 / number_of_data_samples) * (
-                np.dot(feature_data_nd_array.T, (chronic_kidney_disease_probability_prediction - target_data_nd_array)) + (self.regularization_parameter * self.training_weights))
+            gradient = (1 / number_of_data_samples) * (
+                np.dot(feature_data_nd_array.T, (chronic_kidney_disease_probability_prediction - target_data_nd_array)) + (self.regularization_parameter * (self.training_weights / number_of_data_samples)))
             adjustment_for_bias = (1 / number_of_data_samples) * np.sum(
                 chronic_kidney_disease_probability_prediction - target_data_nd_array)
             print("Cost calculation for iteration " + str(iteration_index) + " using regularization parameter " + str(
@@ -85,7 +87,7 @@ class LogisticRegressionAlgorithm:
 
             # Update the training weights and bias:
             self.training_weights = self.training_weights - (
-                    self.learning_rate * cost_function_multiplied_by_derivative_result)
+                    self.learning_rate * gradient)
             self.bias = self.bias - (self.learning_rate * adjustment_for_bias)
 
     def make_predictions_using_test_data(self, testing_data_nd_array):
@@ -259,20 +261,20 @@ standardized_training_data_x_nd_array = apply_standardization_to_data(training_d
 standardized_testing_data_x_nd_array = apply_standardization_to_data(testing_data_x_nd_array)
 
 # Run the logistic regression algorithm for a range of -2 to 4 with a step of 0.2:
-dynamic_learning_rate = 0.001
+learning_rate = 0.001
 show_scatter_plot = False
 regularization_parameter_list = [-2, -1.8, -1.6, -1.4, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0,
                                  1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4, 3.6, 3.8, 4.0]
 for regularization_index in range(len(regularization_parameter_list)):
 
-    lra1 = LogisticRegressionAlgorithm(dynamic_learning_rate, 1000, regularization_parameter_list[regularization_index],
+    lra1 = LogisticRegressionAlgorithm(learning_rate, 1000, regularization_parameter_list[regularization_index],
                                        False)
     # Run on training without standardization
     lra1.run_algorithm(training_data_x_nd_array, training_data_y_nd_array, True, show_scatter_plot)
     # Run on testing without standardization
     lra1.run_algorithm(testing_data_x_nd_array, testing_data_y_nd_array, False, show_scatter_plot)
 
-    lra2 = LogisticRegressionAlgorithm(dynamic_learning_rate, 1000, regularization_parameter_list[regularization_index],
+    lra2 = LogisticRegressionAlgorithm(learning_rate, 1000, regularization_parameter_list[regularization_index],
                                        True)
     # Run on training with standardization
     lra2.run_algorithm(standardized_training_data_x_nd_array, training_data_y_nd_array, True, show_scatter_plot)
@@ -283,5 +285,4 @@ for regularization_index in range(len(regularization_parameter_list)):
     # Run on testing with standardization
     lra2.run_algorithm(standardized_testing_data_x_nd_array, testing_data_y_nd_array, False, show_scatter_plot)
 
-    # Multiply the learning rate by 10 at the end of each regularization parameter usage
-    dynamic_learning_rate = dynamic_learning_rate * 10
+    # Keep the learning rate constant at the end of each regularization parameter usage. In practice, it is best to decrease the learning rate such that the learning algorithm does not overstep the bottom of the gradient. In this case, keeping the learning rate constant is fine. Keeping the learning rate constant ensures that the cost calculation never gets too large (infinity or NAN).
