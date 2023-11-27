@@ -40,9 +40,6 @@
 
 # In the f-measure scatterplot, red dots are those produced using standardized data, and blue dots are those produced using non-standardized data.
 
-# Office Hours 11/27:
-# Does cost function actually factor in at all to the final gradient equation?
-
 import numpy as np
 import pandas as pd
 from scipy.io import arff
