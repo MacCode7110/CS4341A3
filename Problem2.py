@@ -40,6 +40,8 @@
 
 # In the f-measure scatterplot, red dots are those produced using standardized data, and blue dots are those produced using non-standardized data.
 
+# TODO: Add more comments to code before due date.
+
 import numpy as np
 import pandas as pd
 from scipy.io import arff
