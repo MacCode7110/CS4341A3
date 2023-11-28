@@ -247,7 +247,7 @@ feature_dataframe = dataframe_for_all_data_copy.loc[:, feature_name_list]
 target_dataframe = dataframe_for_all_data_copy.loc[:, ['class']]
 
 training_data_x, testing_data_x, training_data_y, testing_data_y = train_test_split(feature_dataframe, target_dataframe,
-                                                                                    train_size=0.8, shuffle=True)
+                                                                                    train_size=0.8, shuffle=True, stratify=target_dataframe)
 
 # Convert training and testing data to Numpy arrays:
 

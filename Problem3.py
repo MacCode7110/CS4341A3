@@ -16,8 +16,9 @@ kmeans = KMeans(n_clusters=10, init='random',
 
 # Compute cluster centers and predict cluster index for each sample.
 # fit_predict returns index of the cluster each sample belongs to.
-kmeans_label_predictions = kmeans.fit_predict(digit_data)
+kmeans_results = kmeans.fit(digit_data)
 
-# i. Assigning cluster labels based on the predicted data above. Each cluster is defined by the digit that represents the majority of the current cluster:
+# Cluster labels are assigned AFTER clustering is done for each algorithm.
+# i. Assigning cluster labels based on the clustered data above. Each cluster is defined by the digit that represents the majority of the current cluster:
 
 
