@@ -26,10 +26,9 @@ digit_data, actual_labels = load_digits(return_X_y=True)
 #                   | | | | | | | | | | |
 
 # Part a
+# Assumption for K-Means Clustering: K = 10
 
 print("KMeans Clustering Results:\n")
-
-# Assumption for K-Means Clustering: K = 10
 
 # K-Means Algorithm using sklearn:
 number_of_kmeans_clusters = 10
@@ -95,6 +94,12 @@ print(kmeans_confusion_matrix)
 print("\nHere is the Fowlkes Mallows Score for KMeans Clustering: " + str(metrics.fowlkes_mallows_score(actual_labels, kmeans_predicted_labels_per_sample)))
 
 # Part b
+# Assumption for Agglomerative Clustering: K = 10
 
 print("\nAgglomerative Clustering with Ward Linkage Results:\n")
+
+# Agglomerative Clustering Algorithm using sklearn:
+number_of_agglomerative_clusters = 10
+
+
 
