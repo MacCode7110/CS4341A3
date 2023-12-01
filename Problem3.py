@@ -6,22 +6,41 @@ from sklearn import metrics
 
 # Classes and helper functions to carry out all three steps in the protocol for each clustering algorithm:
 class Cluster:
-    def __init__(self, cluster_identifier, digit_matrix, predicted_label):
+    def __init__(self, cluster_identifier):
         self.cluster_identifier = cluster_identifier
-        self.digit_matrix = digit_matrix
+        self.digit_list = []
+        self.predicted_label = None
+
+    def set_predicted_label(self, predicted_label):
         self.predicted_label = predicted_label
 
+    def append_digit_to_digit_list(self, digit):
+        self.digit_list.append(digit)
 
-def assign_cluster_labels(number_of_clusters, labels_produced_by_clustering):
+
+k_means_available_cluster_labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+agglomerative_available_cluster_labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+affinity_propagation_available_cluster_labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+
+def find_calculated_clusters(labels_produced_by_clustering):
     cluster_list = []
-    for cluster_index in range(number_of_clusters):
-        obtained_digits_for_current_cluster_index = digit_data[
-            np.where(labels_produced_by_clustering == cluster_index)]  # Returns 2D numpy array
-        flattened_obtained_digits_for_current_cluster_index = obtained_digits_for_current_cluster_index.flatten()
-        unique_digits, counts = np.unique(flattened_obtained_digits_for_current_cluster_index, return_counts=True)
-        most_frequently_occurring_digit_for_current_cluster = unique_digits[counts.argmax()]
-        cluster_list.append(Cluster(cluster_index, obtained_digits_for_current_cluster_index,
-                                    most_frequently_occurring_digit_for_current_cluster))
+
+    for label_index_1 in range(len(labels_produced_by_clustering)):
+        cluster_list.append(Cluster(labels_produced_by_clustering[label_index_1]))
+
+    for sample_index in range(len(digit_data)):
+        for feature_index in range(len(digit_data[sample_index])):
+            for label_index_2 in range(len(labels_produced_by_clustering)):
+                if sample_index == label_index_2:
+                    pass
+
+    return cluster_list
+
+
+def assign_cluster_labels(cluster_list):
+    cluster_list = []
+
     return cluster_list
 
 
@@ -30,7 +49,6 @@ def gather_cluster_predictions_per_sample(cluster_list):
     for cluster_list_index in range(len(cluster_list)):
         for row_index in range(len(cluster_list[cluster_list_index].digit_matrix)):
             predicted_labels_per_sample.append(cluster_list[cluster_list_index].predicted_label)
-
     return predicted_labels_per_sample
 
 
@@ -97,10 +115,11 @@ kmeans_centroids = kmeans.cluster_centers_
 
 # Cluster labels are assigned AFTER clustering is done for the current algorithm.
 # i. Assigning cluster labels based on the clustered data above. Each cluster is defined by the digit that represents the majority of the current cluster:
-kmeans_cluster_list = assign_cluster_labels(number_of_kmeans_clusters, labels_produced_by_kmeans_clustering)
+kmeans_cluster_list = find_calculated_clusters(labels_produced_by_kmeans_clustering)
+updated_kmeans_cluster_list = assign_cluster_labels(kmeans_cluster_list)
 
 # Gather the cluster predictions per sample into one list to prepare for confusion matrix creation:
-kmeans_predicted_labels_per_sample = gather_cluster_predictions_per_sample(kmeans_cluster_list)
+kmeans_predicted_labels_per_sample = gather_cluster_predictions_per_sample(updated_kmeans_cluster_list)
 
 # ii. Computing the confusion matrix:
 print("Number of samples in actual labels for KMeans Clustering: " + str(len(actual_labels)))
