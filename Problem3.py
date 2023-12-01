@@ -164,7 +164,7 @@ print("\nAffinity Propagation Results:\n")
 
 # Affinity Propagation algorithm implementation (through fit method) using sklearn:
 desired_number_of_affinity_propagation_clusters = 10
-affinity_propagation = AffinityPropagation(max_iter=1500, random_state=5)
+affinity_propagation = AffinityPropagation(max_iter=200, convergence_iter=15, damping=0.5, copy=True, preference=None, affinity='euclidean', verbose=False, random_state=None)
 affinity_propagation_results = affinity_propagation.fit(digit_data)
 labels_produced_by_affinity_propagation = affinity_propagation.labels_
 
