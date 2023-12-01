@@ -164,7 +164,8 @@ print("\nAffinity Propagation Results:\n")
 
 # Affinity Propagation algorithm implementation (through fit method) using sklearn:
 desired_number_of_affinity_propagation_clusters = 10
-affinity_propagation = AffinityPropagation(max_iter=200, convergence_iter=15, damping=0.5, copy=True, preference=None, affinity='euclidean', verbose=False, random_state=None)
+affinity_propagation = AffinityPropagation(max_iter=200, convergence_iter=15, damping=0.5, copy=True, preference=None,
+                                           affinity='euclidean', verbose=False, random_state=None)
 affinity_propagation_results = affinity_propagation.fit(digit_data)
 labels_produced_by_affinity_propagation = affinity_propagation.labels_
 
@@ -195,3 +196,8 @@ affinity_propagation_fowlkes_mallows_score = get_fowlkes_mallows_score(actual_la
                                                                        affinity_propagation_labels_per_sample)
 print("\nHere is the Fowlkes Mallows Score for Affinity Propagation: " + str(
     affinity_propagation_fowlkes_mallows_score))
+
+# Fixes:
+# When taking majority digit for each cluster, if a digit is already selected as the majority digit of a previous cluster, need to take the next highest majority digit for the current cluster.
+# Affinity Propagation:
+# The samples with insanely high labels (outside the class range 0-9) are most likely outliers. Put these outliers into a different bin (bin 10), and exclude them from the computation of the confusion matrix. Only use samples assigned bins/classes 0-9 to calculate the confusion matrix.

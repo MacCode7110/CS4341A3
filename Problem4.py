@@ -86,6 +86,8 @@ testing_data_y_nd_array = testing_data_y.to_numpy()
 training_data_y_nd_array = training_data_y.to_numpy()
 testing_data_x_nd_array = testing_data_x.to_numpy()
 
+# May need to adjust numpy arrays.
+
 # Part a - Support Vector Machine with the linear kernel and default parameters:
 
 # Part b - Support Vector Machine with the RBF kernel and default parameters:
