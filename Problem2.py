@@ -4,13 +4,12 @@
 
 # Referencing the following resources to gain a better understanding of logistic regression:
 # https://datatab.net/tutorial/logistic-regression
-#
 
 # Logistic regression is a machine learning algorithm used for binary classification, and it models a binary dependent variable.
 # Logistic regression predicts the probability of an observation belonging to a certain class or label.
 # Classification is a part of supervised machine learning that predicts which category some observation (the dataset linked to the given entity) belongs to based on its features.
 # Regularization attempts to limit the complexity of the data model (prevent overfitting of data and improve generalization of newly introduced data).
-# This program uses L2 Regularization
+# This program uses regularization with log loss as shown on the class slides.
 
 # In the chronic_kidney_disease_full.arff file, here is how I have decided that non-numeric values and question marks are handled and manipulated so that the logistic regression works properly:
 #   1. Question marks:
@@ -40,8 +39,6 @@
 
 # In the f-measure scatterplot, red dots are those produced using standardized data, and blue dots are those produced using non-standardized data.
 
-# TODO: Add more comments to code before due date.
-
 import numpy as np
 import pandas as pd
 from scipy.io import arff
@@ -60,7 +57,7 @@ class LogisticRegressionAlgorithm:
         self.bias = 0
         self.using_standardization = using_standardization
 
-    def train_using_gradient_descent_and_l2_regularization(self, feature_data_nd_array, target_data_nd_array):
+    def train_using_gradient_descent_and_regularization(self, feature_data_nd_array, target_data_nd_array):
         number_of_data_samples, number_of_features = np.shape(feature_data_nd_array)
         self.training_weights = np.zeros((number_of_features, number_of_data_samples))
 
@@ -68,17 +65,16 @@ class LogisticRegressionAlgorithm:
             # Take the dot product of the data_nd_array with a series of weights to perform gradient descent. Each entry in the feature data is multiplied by a particular weight:
             weighted_sum_of_input_features = np.dot(feature_data_nd_array, self.training_weights) + self.bias
             # Get the regularization expression:
-            complexity_multiplied_by_regularization_parameter_result = self.regularization_parameter * np.sum(
+            complexity_multiplied_by_regularization_parameter_result = (self.regularization_parameter / (2 * number_of_data_samples)) * np.sum(
                 np.square(self.training_weights))
             # Compute predictions of chronic kidney disease using sigmoid function:
             chronic_kidney_disease_probability_prediction = 1 / (1 + np.exp(-weighted_sum_of_input_features))
             # Calculate the loss/cost equation:
-            cost_calculation = ((1 / (2 * number_of_data_samples)) * np.sum(np.square(
-                chronic_kidney_disease_probability_prediction - target_data_nd_array))) + complexity_multiplied_by_regularization_parameter_result
+            cost_calculation = ((-1 / number_of_data_samples) * np.sum((target_data_nd_array * np.log(chronic_kidney_disease_probability_prediction)) + ((1 - target_data_nd_array) * np.log(1 - chronic_kidney_disease_probability_prediction)))) + complexity_multiplied_by_regularization_parameter_result
 
             # Recalculate (cost function * derivatives) for training weights and bias. For the following dot product to work correctly, we need to transpose the feature_data_nd_array so that features are the rows and samples are the columns:
             gradient = (1 / number_of_data_samples) * (
-                np.dot(feature_data_nd_array.T, (chronic_kidney_disease_probability_prediction - target_data_nd_array)) + (self.regularization_parameter * (self.training_weights / number_of_data_samples)))
+                np.dot(feature_data_nd_array.T, (chronic_kidney_disease_probability_prediction - target_data_nd_array)) + np.sum(self.regularization_parameter * self.training_weights))
             adjustment_for_bias = (1 / number_of_data_samples) * np.sum(
                 chronic_kidney_disease_probability_prediction - target_data_nd_array)
             print("Cost calculation for iteration " + str(iteration_index) + " using regularization parameter " + str(
@@ -157,7 +153,7 @@ class LogisticRegressionAlgorithm:
             f_measure = self.compute_f_measure_using_confusion_matrix(confusion_matrix)
             self.draw_scatter_plot(f_measure, show_plot)
         else:
-            self.train_using_gradient_descent_and_l2_regularization(feature_data_nd_array, target_data_nd_array)
+            self.train_using_gradient_descent_and_regularization(feature_data_nd_array, target_data_nd_array)
 
 
 # Using standardization formula from slides: xi = (xi - mean of training_data) / standard deviation of training data. This standardization formula is applied for each column using the [:, feature_array_index] notation, which selects a particular column (subarray):

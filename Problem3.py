@@ -71,7 +71,6 @@ def get_fowlkes_mallows_score(ground_truth_labels, predicted_labels_per_sample):
 digit_data, actual_labels = load_digits(return_X_y=True)
 (number_of_samples, number_of_features), number_of_digits = digit_data.shape, np.unique(actual_labels).size
 
-
 # Structure of confusion matrix (10 X 10):
 #                      Predicted Label
 #                   | | | | | | | | | | |
@@ -195,7 +194,7 @@ affinity_propagation_fowlkes_mallows_score = get_fowlkes_mallows_score(actual_la
 print("\nHere is the Fowlkes Mallows Score for Affinity Propagation: " + str(
     affinity_propagation_fowlkes_mallows_score))
 
-# Fixes:
+# Fixes to implement if the program cannot behave normally without them:
 # When taking majority digit for each cluster, if a digit is already selected as the majority digit of a previous cluster, need to take the next highest majority digit for the current cluster.
 # Affinity Propagation:
 # The samples with insanely high labels (outside the class range 0-9) are most likely outliers. Put these outliers into a different bin (bin 10), and exclude them from the computation of the confusion matrix. Only use samples assigned bins/classes 0-9 to calculate the confusion matrix.
