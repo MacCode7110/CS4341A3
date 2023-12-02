@@ -6,41 +6,22 @@ from sklearn import metrics
 
 # Classes and helper functions to carry out all three steps in the protocol for each clustering algorithm:
 class Cluster:
-    def __init__(self, cluster_identifier):
+    def __init__(self, cluster_identifier, digit_matrix, predicted_label):
         self.cluster_identifier = cluster_identifier
-        self.digit_list = []
-        self.predicted_label = None
-
-    def set_predicted_label(self, predicted_label):
+        self.digit_matrix = digit_matrix
         self.predicted_label = predicted_label
 
-    def append_digit_to_digit_list(self, digit):
-        self.digit_list.append(digit)
 
-
-k_means_available_cluster_labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-agglomerative_available_cluster_labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-affinity_propagation_available_cluster_labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-
-
-def find_calculated_clusters(labels_produced_by_clustering):
+def assign_cluster_labels(labels_produced_by_clustering, number_of_clusters):
     cluster_list = []
-
-    for label_index_1 in range(len(labels_produced_by_clustering)):
-        cluster_list.append(Cluster(labels_produced_by_clustering[label_index_1]))
-
-    for sample_index in range(len(digit_data)):
-        for feature_index in range(len(digit_data[sample_index])):
-            for label_index_2 in range(len(labels_produced_by_clustering)):
-                if sample_index == label_index_2:
-                    pass
-
-    return cluster_list
-
-
-def assign_cluster_labels(cluster_list):
-    cluster_list = []
-
+    for cluster_index in range(number_of_clusters):
+        obtained_digits_for_current_cluster_index = digit_data[
+            np.where(labels_produced_by_clustering == cluster_index)]  # Returns 2D numpy array
+        flattened_obtained_digits_for_current_cluster_index = obtained_digits_for_current_cluster_index.flatten()
+        unique_digits, counts = np.unique(flattened_obtained_digits_for_current_cluster_index, return_counts=True)
+        most_frequently_occurring_digit_for_current_cluster = unique_digits[counts.argmax()]
+        cluster_list.append(Cluster(cluster_index, obtained_digits_for_current_cluster_index,
+                                    most_frequently_occurring_digit_for_current_cluster))
     return cluster_list
 
 
@@ -90,6 +71,7 @@ def get_fowlkes_mallows_score(ground_truth_labels, predicted_labels_per_sample):
 digit_data, actual_labels = load_digits(return_X_y=True)
 (number_of_samples, number_of_features), number_of_digits = digit_data.shape, np.unique(actual_labels).size
 
+
 # Structure of confusion matrix (10 X 10):
 #                      Predicted Label
 #                   | | | | | | | | | | |
@@ -115,11 +97,10 @@ kmeans_centroids = kmeans.cluster_centers_
 
 # Cluster labels are assigned AFTER clustering is done for the current algorithm.
 # i. Assigning cluster labels based on the clustered data above. Each cluster is defined by the digit that represents the majority of the current cluster:
-kmeans_cluster_list = find_calculated_clusters(labels_produced_by_kmeans_clustering)
-updated_kmeans_cluster_list = assign_cluster_labels(kmeans_cluster_list)
+kmeans_cluster_list = assign_cluster_labels(labels_produced_by_kmeans_clustering, number_of_kmeans_clusters)
 
 # Gather the cluster predictions per sample into one list to prepare for confusion matrix creation:
-kmeans_predicted_labels_per_sample = gather_cluster_predictions_per_sample(updated_kmeans_cluster_list)
+kmeans_predicted_labels_per_sample = gather_cluster_predictions_per_sample(kmeans_cluster_list)
 
 # ii. Computing the confusion matrix:
 print("Number of samples in actual labels for KMeans Clustering: " + str(len(actual_labels)))
@@ -151,8 +132,7 @@ labels_produced_by_agglomerative_clustering = agglomerative_clustering.labels_
 
 # Cluster labels are assigned AFTER clustering is done for the current algorithm.
 # i. Assigning cluster labels based on the clustered data above. Each cluster is defined by the digit that represents the majority of the current cluster:
-agglomerative_cluster_list = assign_cluster_labels(number_of_agglomerative_clusters,
-                                                   labels_produced_by_agglomerative_clustering)
+agglomerative_cluster_list = assign_cluster_labels(labels_produced_by_agglomerative_clustering, number_of_agglomerative_clusters)
 
 # Gather the cluster predictions per sample into one list to prepare for confusion matrix creation:
 agglomerative_clustering_labels_per_sample = gather_cluster_predictions_per_sample(agglomerative_cluster_list)
@@ -190,8 +170,7 @@ labels_produced_by_affinity_propagation = affinity_propagation.labels_
 
 # Cluster labels are assigned AFTER clustering is done for the current algorithm.
 # i. Assigning cluster labels based on the clustered data above. Each cluster is defined by the digit that represents the majority of the current cluster:
-affinity_propagation_cluster_list = assign_cluster_labels(desired_number_of_affinity_propagation_clusters,
-                                                          labels_produced_by_affinity_propagation)
+affinity_propagation_cluster_list = assign_cluster_labels(labels_produced_by_affinity_propagation, desired_number_of_affinity_propagation_clusters)
 
 # Gather the cluster predictions per sample into one list to prepare for confusion matrix creation:
 affinity_propagation_labels_per_sample = gather_cluster_predictions_per_sample(affinity_propagation_cluster_list)
