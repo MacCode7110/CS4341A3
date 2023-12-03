@@ -2,6 +2,9 @@
 import pandas as pd
 from scipy.io import arff
 from sklearn.model_selection import train_test_split
+from sklearn import svm
+from sklearn.metrics import f1_score
+from sklearn.ensemble import RandomForestClassifier
 
 all_data = arff.loadarff('chronic_kidney_disease_full.arff')
 dataframe_for_all_data = pd.DataFrame(all_data[0])
@@ -86,10 +89,61 @@ testing_data_y_nd_array = testing_data_y.to_numpy()
 training_data_y_nd_array = training_data_y.to_numpy()
 testing_data_x_nd_array = testing_data_x.to_numpy()
 
-# May need to adjust numpy arrays.
+# Question for OH 12/4/23:
+# I am seeing this in Support Vector Machine documentation for predict function:
+#   X{array-like, sparse matrix} of shape (n_samples, n_features) or (n_samples_test, n_samples_train)
+#   For kernel=”precomputed”, the expected shape of X is (n_samples_test, n_samples_train).
+#   When testing the testing and training datasets, do we need to combine both datasets for x sets into a single 2D array? (This single 2D array would be the input to the predict function)
 
 # Part a - Support Vector Machine with the linear kernel and default parameters:
 
+# i. Training the model below using the training datasets and test the data using the predict method to make predictions:
+
+# Create an SVC:
+support_vector_machine_linear_kernel = svm.SVC(kernel='linear')
+support_vector_machine_linear_kernel.fit(training_data_x_nd_array, training_data_y_nd_array.flatten())
+svm_linear_kernel_predicted_class_labels_from_testing = support_vector_machine_linear_kernel.predict(testing_data_x_nd_array)
+svm_linear_kernel_predicted_class_labels_from_training = support_vector_machine_linear_kernel.predict(training_data_x_nd_array)
+
+# ii. Calculate the f1 scores:
+
+f1_score_for_testing_data_svm_linear_kernel = f1_score(testing_data_y_nd_array, svm_linear_kernel_predicted_class_labels_from_testing)
+f1_score_for_training_data_svm_linear_kernel = f1_score(training_data_y_nd_array, svm_linear_kernel_predicted_class_labels_from_training)
+
+print("F-Measure for Support Vector Machine linear kernel tested with testing data: " + str(f1_score_for_testing_data_svm_linear_kernel))
+print("F-Measure for Support Vector Machine linear kernel tested with training data: " + str(f1_score_for_training_data_svm_linear_kernel) + "\n")
+
 # Part b - Support Vector Machine with the RBF kernel and default parameters:
 
+# i. Training the model below using the training datasets and test the data using the predict method to make predictions:
+# Create an SVC:
+
+support_vector_machine_RBF_kernel = svm.SVC(kernel='rbf')
+support_vector_machine_RBF_kernel.fit(training_data_x_nd_array, training_data_y_nd_array.flatten())
+svm_RBF_kernel_predicted_class_labels_from_testing = support_vector_machine_RBF_kernel.predict(testing_data_x_nd_array)
+svm_RBF_kernel_predicted_class_labels_from_training = support_vector_machine_RBF_kernel.predict(training_data_x_nd_array)
+
+# ii. Calculate the f1 scores:
+
+f1_score_for_testing_data_svm_RBF_kernel = f1_score(testing_data_y_nd_array, svm_RBF_kernel_predicted_class_labels_from_testing)
+f1_score_for_training_data_svm_RBF_kernel = f1_score(training_data_y_nd_array, svm_RBF_kernel_predicted_class_labels_from_training)
+
+print("F-Measure for Support Vector Machine RBF kernel tested with testing data: " + str(f1_score_for_testing_data_svm_RBF_kernel))
+print("F-Measure for Support Vector Machine RBF kernel tested with training data: " + str(f1_score_for_training_data_svm_RBF_kernel) + "\n")
+
 # Part c - Random Forest with Default Parameters:
+
+# i. Training the model below using the training datasets and test the data using the predict method to make predictions:
+
+random_forest = RandomForestClassifier()
+random_forest.fit(training_data_x_nd_array, training_data_y_nd_array.flatten())
+random_forest_predicted_class_labels_from_testing = random_forest.predict(testing_data_x_nd_array)
+random_forest_predicted_class_labels_from_training = random_forest.predict(training_data_x_nd_array)
+
+# ii. Calculate the f1 scores:
+
+f1_score_for_testing_data_random_forest = f1_score(testing_data_y_nd_array, random_forest_predicted_class_labels_from_testing)
+f1_score_for_training_data_random_forest = f1_score(training_data_y_nd_array, random_forest_predicted_class_labels_from_training)
+
+print("F-Measure for Random Forest tested with testing data: " + str(f1_score_for_testing_data_random_forest))
+print("F-Measure for Random Forest tested with training data: " + str(f1_score_for_training_data_random_forest))
