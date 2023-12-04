@@ -37,7 +37,7 @@ def manipulate_confusion_matrix(number_of_clusters, predicted_labels, confusion_
         if digit not in unique_predicted_digits:
             unique_predicted_digits.append(digit)
 
-    if len(unique_predicted_digits) < number_of_clusters:  # Number of clusters is always 10 for all assumptions.
+    if len(unique_predicted_digits) < number_of_clusters:  # Number of clusters we compare against is always 10 for all assumptions.
         for cluster_number in range(0, number_of_clusters):
             if cluster_number not in unique_predicted_digits:
                 digits_not_predicted.append(cluster_number)
@@ -92,9 +92,7 @@ print("Number of samples in predicted labels for KMeans Clustering: " + str(
     len(kmeans_predicted_labels)) + "\n")
 
 kmeans_confusion_matrix = compute_confusion_matrix(actual_labels, kmeans_predicted_labels)
-updated_kmeans_confusion_matrix = manipulate_confusion_matrix(kmeans_resulting_total_cluster_number,
-                                                              kmeans_predicted_labels,
-                                                              kmeans_confusion_matrix)
+updated_kmeans_confusion_matrix = manipulate_confusion_matrix(10, kmeans_predicted_labels, kmeans_confusion_matrix)
 
 print("10 X 10 confusion matrix produced for KMeans Clustering:")
 print(updated_kmeans_confusion_matrix)
@@ -128,9 +126,7 @@ print("Number of samples in predicted labels for Agglomerative Clustering: " + s
 
 
 agglomerative_confusion_matrix = compute_confusion_matrix(actual_labels, agglomerative_predicted_labels)
-updated_agglomerative_confusion_matrix = manipulate_confusion_matrix(agglomerative_resulting_total_cluster_number,
-                                                                     agglomerative_predicted_labels,
-                                                                     agglomerative_confusion_matrix)
+updated_agglomerative_confusion_matrix = manipulate_confusion_matrix(10, agglomerative_predicted_labels, agglomerative_confusion_matrix)
 
 
 print("10 X 10 confusion matrix produced for Agglomerative Clustering:")
@@ -170,10 +166,7 @@ print("Number of samples in predicted labels for Affinity Propagation: " + str(
 
 
 affinity_propagation_confusion_matrix = compute_confusion_matrix(actual_labels, affinity_propagation_predicted_labels)
-updated_affinity_propagation_confusion_matrix = manipulate_confusion_matrix(
-    affinity_propagation_resulting_total_cluster_number,
-    affinity_propagation_predicted_labels,
-    affinity_propagation_confusion_matrix)
+updated_affinity_propagation_confusion_matrix = manipulate_confusion_matrix(10, affinity_propagation_predicted_labels, affinity_propagation_confusion_matrix)
 
 
 print("10 X 10 confusion matrix produced for Affinity Propagation:")

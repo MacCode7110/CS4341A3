@@ -59,19 +59,19 @@ class LogisticRegressionAlgorithm:
 
     def train_using_gradient_descent_and_regularization(self, feature_data_nd_array, target_data_nd_array):
         number_of_data_samples, number_of_features = np.shape(feature_data_nd_array)
-        self.training_weights = np.zeros((number_of_features, number_of_data_samples))
+        self.training_weights = np.zeros((number_of_data_samples, number_of_features))
+        self.training_weights = self.training_weights.T
 
         for iteration_index in range(self.number_of_iterations):
             # Take the dot product of the data_nd_array with a series of weights to perform gradient descent. Each entry in the feature data is multiplied by a particular weight:
             weighted_sum_of_input_features = np.dot(feature_data_nd_array, self.training_weights) + self.bias
             # Get the regularization expression:
-            complexity_multiplied_by_regularization_parameter_result = (self.regularization_parameter / (2 * number_of_data_samples)) * np.sum(
+            second_term_in_cost_calculation = (self.regularization_parameter / (2 * number_of_data_samples)) * np.sum(
                 np.square(self.training_weights))
             # Compute predictions of chronic kidney disease using sigmoid function:
             chronic_kidney_disease_probability_prediction = 1 / (1 + np.exp(-weighted_sum_of_input_features))
             # Calculate the loss/cost equation:
-            cost_calculation = ((-1 / number_of_data_samples) * np.sum((target_data_nd_array * np.log(chronic_kidney_disease_probability_prediction)) + ((1 - target_data_nd_array) * np.log(1 - chronic_kidney_disease_probability_prediction)))) + complexity_multiplied_by_regularization_parameter_result
-
+            cost_calculation = ((-1 / number_of_data_samples) * np.sum((target_data_nd_array * np.log(chronic_kidney_disease_probability_prediction)) + ((1 - target_data_nd_array) * np.log(1 - chronic_kidney_disease_probability_prediction)))) + second_term_in_cost_calculation
             # Recalculate (cost function * derivatives) for training weights and bias. For the following dot product to work correctly, we need to transpose the feature_data_nd_array so that features are the rows and samples are the columns:
             gradient = (1 / number_of_data_samples) * (
                 np.dot(feature_data_nd_array.T, (chronic_kidney_disease_probability_prediction - target_data_nd_array)) + np.sum(self.regularization_parameter * self.training_weights))
