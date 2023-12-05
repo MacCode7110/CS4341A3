@@ -71,7 +71,8 @@ class LogisticRegressionAlgorithm:
             # Compute predictions of chronic kidney disease using sigmoid function:
             chronic_kidney_disease_probability_prediction = 1 / (1 + np.exp(-weighted_sum_of_input_features))
             # Calculate the loss/cost equation:
-            cost_calculation = ((-1 / number_of_data_samples) * np.sum((target_data_nd_array * np.log(chronic_kidney_disease_probability_prediction)) + ((1 - target_data_nd_array) * np.log(1 - chronic_kidney_disease_probability_prediction)))) + second_term_in_cost_calculation
+            # In order to have my cost calculation avoid outputting nan, I have added small delta values (1 * e^-12) to each parameter for each log function (as recommended by Guanyi).
+            cost_calculation = ((-1 / number_of_data_samples) * np.sum((target_data_nd_array * np.log(chronic_kidney_disease_probability_prediction + np.exp(-12))) + ((1 - target_data_nd_array) * np.log(1 - chronic_kidney_disease_probability_prediction + np.exp(-12))))) + second_term_in_cost_calculation
             # Recalculate (cost function * derivatives) for training weights and bias. For the following dot product to work correctly, we need to transpose the feature_data_nd_array so that features are the rows and samples are the columns:
             gradient = (1 / number_of_data_samples) * (
                 np.dot(feature_data_nd_array.T, (chronic_kidney_disease_probability_prediction - target_data_nd_array)) + np.sum(self.regularization_parameter * self.training_weights))
