@@ -2,7 +2,7 @@
 
 # Parts a, b, and c - implementation, training, and testing on chronic_kidney_disease dataset.
 
-# Referencing the following resources to gain a better understanding of logistic regression:
+# Referencing the following resources to gain a better understanding of certain parts of logistic regression:
 # https://datatab.net/tutorial/logistic-regression
 
 # Logistic regression is a machine learning algorithm used for binary classification, and it models a binary dependent variable.
