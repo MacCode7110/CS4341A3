@@ -133,25 +133,29 @@ class LogisticRegressionAlgorithm:
         f_measure = (2 * precision * recall) / (precision + recall)
         return f_measure
 
-    def draw_scatter_plot(self, f_measure, show_plot):
-        if not self.using_standardization:
+    def draw_scatter_plot(self, f_measure, testing_with_training_data, show_plot):
+        if not self.using_standardization and not testing_with_training_data:
             plt.scatter(self.regularization_parameter, f_measure, c='b')
-        else:
+        elif not self.using_standardization and testing_with_training_data:
             plt.scatter(self.regularization_parameter, f_measure, c='r')
+        elif self.using_standardization and not testing_with_training_data:
+            plt.scatter(self.regularization_parameter, f_measure, c='g')
+        elif self.using_standardization and testing_with_training_data:
+            plt.scatter(self.regularization_parameter, f_measure, c='m')
 
         if show_plot:
             plt.xlabel('Regularization Parameter')
             plt.ylabel('f-measure')
-            plt.legend(["Data Without Standardization", "Standardized Data"], loc="lower right")
+            plt.legend(["Testing Data Without Standardization", "Training Data Without Standardization", "Testing Data With Standardization", "Training Data With Standardization"], loc="lower right")
             plt.show()
 
-    def run_algorithm(self, feature_data_nd_array, target_data_nd_array, run_on_training_data, show_plot):
-        if not run_on_training_data:
+    def run_algorithm(self, feature_data_nd_array, target_data_nd_array, train_on_training_data, testing_with_training_data, show_plot):
+        if not train_on_training_data:
             chronic_kidney_disease_class_predictions = self.make_predictions_using_test_data(feature_data_nd_array)
             confusion_matrix = self.compute_confusion_matrix_using_predictions(chronic_kidney_disease_class_predictions,
                                                                                target_data_nd_array)
             f_measure = self.compute_f_measure_using_confusion_matrix(confusion_matrix)
-            self.draw_scatter_plot(f_measure, show_plot)
+            self.draw_scatter_plot(f_measure, testing_with_training_data, show_plot)
         else:
             self.train_using_gradient_descent_and_regularization(feature_data_nd_array, target_data_nd_array)
 
@@ -264,20 +268,24 @@ for regularization_index in range(len(regularization_parameter_list)):
 
     lra1 = LogisticRegressionAlgorithm(learning_rate, 1000, regularization_parameter_list[regularization_index],
                                        False)
-    # Run on training without standardization
-    lra1.run_algorithm(training_data_x_nd_array, training_data_y_nd_array, True, show_scatter_plot)
-    # Run on testing without standardization
-    lra1.run_algorithm(testing_data_x_nd_array, testing_data_y_nd_array, False, show_scatter_plot)
+    # Run training on training data without standardization
+    lra1.run_algorithm(training_data_x_nd_array, training_data_y_nd_array, True, False, show_scatter_plot)
+    # Run testing on testing data without standardization
+    lra1.run_algorithm(testing_data_x_nd_array, testing_data_y_nd_array, False, False, show_scatter_plot)
+    # Run testing on training data without standardization
+    lra1.run_algorithm(training_data_x_nd_array, training_data_y_nd_array, False, True, show_scatter_plot)
 
     lra2 = LogisticRegressionAlgorithm(learning_rate, 1000, regularization_parameter_list[regularization_index],
                                        True)
-    # Run on training with standardization
-    lra2.run_algorithm(standardized_training_data_x_nd_array, training_data_y_nd_array, True, show_scatter_plot)
+    # Run training on training data with standardization
+    lra2.run_algorithm(standardized_training_data_x_nd_array, training_data_y_nd_array, True, False, show_scatter_plot)
+    # Run testing on testing data with standardization
+    lra2.run_algorithm(standardized_testing_data_x_nd_array, testing_data_y_nd_array, False, False, show_scatter_plot)
 
     if regularization_parameter_list[regularization_index] == 4:
         show_scatter_plot = True
 
-    # Run on testing with standardization
-    lra2.run_algorithm(standardized_testing_data_x_nd_array, testing_data_y_nd_array, False, show_scatter_plot)
+    # Run testing on training data with standardization
+    lra2.run_algorithm(standardized_training_data_x_nd_array, training_data_y_nd_array, False, True, show_scatter_plot)
 
     # Keep the learning rate constant at the end of each regularization parameter usage. In practice, it is best to decrease the learning rate such that the learning algorithm does not overstep the bottom of the gradient. In this case, keeping the learning rate constant is fine. Keeping the learning rate constant ensures that the cost calculation never gets too large (infinity or NAN).
